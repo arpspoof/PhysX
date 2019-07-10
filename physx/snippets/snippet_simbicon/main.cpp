@@ -86,6 +86,8 @@ void initPhysics(bool /*interactive*/)
 	gArticulation = gPhysics->createArticulationReducedCoordinate();
 
 	loader();
+
+	gScene->addArticulation(*gArticulation);
 }
 
 void stepPhysics(bool /*interactive*/)

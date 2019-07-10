@@ -1,7 +1,12 @@
 #include "globals.h"
 #include "config.h"
+#include "robot.h"
 
-PxArticulationJointReducedCoordinate* joint12; 
+void loader5() {
+	loadRoot();
+}
+
+PxArticulationJointReducedCoordinate* joint12;
 PxArticulationLink* link1;
 PxArticulationLink* link2;
 
@@ -14,7 +19,7 @@ void setKPKD() {
 	joint12->setDrive(PxArticulationAxis::eSWING2, kp, kd, 100);
 }
 
-void loader2() {
+void loader() {
 	PxQuat rtz2pi(PxPi / 2, PxVec3(0, 0, 1));
 
 	PxArticulationLink* base = gArticulation->createLink(NULL, PxTransform(PxVec3(0.f, 0.25f, 0.f), rtz2pi));
@@ -54,7 +59,7 @@ void loader2() {
 	gScene->addArticulation(*gArticulation);
 }
 
-void loader() {
+void loader3() {
 	const PxReal runnerLength = 2.f;
 	const PxReal placementDistance = 1.8f;
 
