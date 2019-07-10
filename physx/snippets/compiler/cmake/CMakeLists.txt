@@ -82,7 +82,7 @@ INCLUDE(${PHYSX_ROOT_DIR}/snippets/${PROJECT_CMAKE_FILES_DIR}/${TARGET_BUILD_PLA
 SET(SOURCE_DISTRO_FILE_LIST "")
 
 # Include all of the projects
-SET(SNIPPETS_LIST Articulation BVHStructure ContactModification ContactReport ContactReportCCD ConvexMeshCreate
+SET(SNIPPETS_LIST _Simbicon Articulation BVHStructure ContactModification ContactReport ContactReportCCD ConvexMeshCreate
 	CustomJoint CustomProfiler DeformableMesh HelloWorld ImmediateArticulation ImmediateMode Joint MBP MultiThreading
 	PrunerSerialization RaycastCCD Serialization SplitFetchResults 
 	SplitSim Stepper ToleranceScale TriangleMeshCreate)
