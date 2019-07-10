@@ -2,7 +2,7 @@
 #include "config.h"
 #include "robot.h"
 
-void loader5() {
+void loader() {
 	loadRoot();
 }
 
@@ -19,7 +19,7 @@ void setKPKD() {
 	joint12->setDrive(PxArticulationAxis::eSWING2, kp, kd, 100);
 }
 
-void loader() {
+void loader5() {
 	PxQuat rtz2pi(PxPi / 2, PxVec3(0, 0, 1));
 
 	PxArticulationLink* base = gArticulation->createLink(NULL, PxTransform(PxVec3(0.f, 0.25f, 0.f), rtz2pi));

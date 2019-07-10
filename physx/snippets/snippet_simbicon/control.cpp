@@ -11,13 +11,13 @@ PxReal twistTarget, swing1Target, swing2Target;
 
 extern PxArticulationJointReducedCoordinate *jRootChest;
 
-void control6(PxReal /*dt*/) {
+void control(PxReal /*dt*/) {
 	jRootChest->setDriveTarget(PxArticulationAxis::eTWIST, twistTarget);
 	jRootChest->setDriveTarget(PxArticulationAxis::eSWING1, swing1Target);
 	jRootChest->setDriveTarget(PxArticulationAxis::eSWING2, swing2Target);
 }
 
-void control(PxReal /*dt*/) {
+void control5(PxReal /*dt*/) {
 	joint12->setDriveTarget(PxArticulationAxis::eTWIST, twistTarget);
 	joint12->setDriveTarget(PxArticulationAxis::eSWING1, swing1Target);
 	joint12->setDriveTarget(PxArticulationAxis::eSWING2, swing2Target);

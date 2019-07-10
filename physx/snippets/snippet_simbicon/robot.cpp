@@ -7,7 +7,7 @@
 using namespace physx;
 using namespace std;
 
-PxArticulationLink *root;
+PxArticulationLink *base, *root;
 PxArticulationLink *chest, *test;
 
 PxArticulationJointReducedCoordinate *jRootChest;
@@ -62,7 +62,16 @@ void loadChest(PxVec3 offset) {
 
 void loadRoot() {
 	PxReal rootHeight = getConfigF("T_ROOT_HEIGHT");
-	PxVec3 rootOffset(0.f, rootHeight, 0.f);
-	genSphereLink(root, NULL, PxTransform(rootOffset, rtz), 0.36f, 6.0f);
+	PxVec3 rootOffset(0.f, rootHeight, 0.f); 
+
+	base = gArticulation->createLink(NULL, PxTransform(rootOffset, rtz));
+	PxRigidBodyExt::updateMassAndInertia(*base, 1.0f);
+
+	genSphereLink(root, base, PxTransform(rootOffset, rtz), 0.36f, 600.0f);
+	auto jBaseRoot = static_cast<PxArticulationJointReducedCoordinate*>(root->getInboundJoint());
+	jBaseRoot->setJointType(PxArticulationJointType::eFIX);
+	jBaseRoot->setParentPose(PxTransform(PxVec3(0, 0, 0)));
+	jBaseRoot->setChildPose(PxTransform(PxVec3(0, 0, 0)));
+
 	loadChest(rootOffset);
 }
