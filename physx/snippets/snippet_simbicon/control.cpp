@@ -16,7 +16,7 @@ extern PxArticulationJointReducedCoordinate *jRHipRKnee, *jLHipLKnee;
 void control(PxReal /*dt*/) {
 //	jLHipLKnee->setDriveTarget(PxArticulationAxis::eTWIST, twistTarget);
 //	jLHipLKnee->setDriveTarget(PxArticulationAxis::eSWING1, swing1Target);
-	jLHipLKnee->setDriveTarget(PxArticulationAxis::eSWING2, swing2Target);
+//	jLHipLKnee->setDriveTarget(PxArticulationAxis::eSWING2, swing2Target);
 }
 
 void control5(PxReal /*dt*/) {

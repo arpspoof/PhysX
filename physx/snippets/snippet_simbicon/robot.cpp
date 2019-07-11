@@ -143,16 +143,16 @@ void loadRoot() {
 	base = gArticulation->createLink(NULL, PxTransform(baseOffset, rtz));
 	PxRigidBodyExt::updateMassAndInertia(*base, 1.0f);
 
-	PxVec3 rootLinkOffset = baseOffset + PxVec3(0.f, 0.28f, 0.f);
 	PxVec3 rootJointOffset = baseOffset;
+	PxVec3 rootLinkOffset = baseOffset + PxVec3(0.f, 0.28f, 0.f);
 
 	genSphereLink(root, base, PxTransform(rootLinkOffset, rtz), 0.36f, 600.0f);
 	auto jBaseRoot = static_cast<PxArticulationJointReducedCoordinate*>(root->getInboundJoint());
 	jBaseRoot->setJointType(PxArticulationJointType::eFIX);
-	jBaseRoot->setParentPose(PxTransform(rootJointOffset - baseOffset));
-	jBaseRoot->setChildPose(PxTransform(rootJointOffset - rootLinkOffset));
+	jBaseRoot->setParentPose(getJointPose(rootJointOffset - baseOffset));
+	jBaseRoot->setChildPose(getJointPose(rootJointOffset - rootLinkOffset));
 
-	loadChest(rootJointOffset, rootJointOffset);
-	loadRHip(rootJointOffset, rootJointOffset);
-	loadLHip(rootJointOffset, rootJointOffset);
+	loadChest(rootJointOffset, rootLinkOffset);
+	loadRHip(rootJointOffset, rootLinkOffset);
+	loadLHip(rootJointOffset, rootLinkOffset);
 }
