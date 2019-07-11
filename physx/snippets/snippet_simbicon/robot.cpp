@@ -14,7 +14,7 @@ PxArticulationLink *lHip, *lKnee, *lAnkle;
 
 PxArticulationJointReducedCoordinate *jRootChest, *jRootRHip, *jRootLHip;
 PxArticulationJointReducedCoordinate *jChestNeck;
-
+PxArticulationJointReducedCoordinate *jRHipRKnee, *jLHipLKnee;
 
 static void genSphereLink(PxArticulationLink *&link, PxArticulationLink *parent, PxTransform transform,
 	PxReal r, PxReal m) {
@@ -39,7 +39,9 @@ static void genSphericalJoint(PxArticulationJointReducedCoordinate *&joint, stri
 	joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eLIMITED);
 	joint->setMotion(PxArticulationAxis::eSWING1, PxArticulationMotion::eFREE);
 	joint->setMotion(PxArticulationAxis::eSWING2, PxArticulationMotion::eFREE);
-	joint->setLimit(PxArticulationAxis::eTWIST, -1.3f, 1.3f);
+
+	PxReal twistLimit = getConfigF("C_TWIST_LIMIT");
+	joint->setLimit(PxArticulationAxis::eTWIST, -twistLimit, twistLimit);
 
 	PxReal kp = getConfigF("P_KP_" + name);
 	PxReal kd = getConfigF("P_KD_" + name);
@@ -47,6 +49,21 @@ static void genSphericalJoint(PxArticulationJointReducedCoordinate *&joint, stri
 	joint->setDrive(PxArticulationAxis::eTWIST, kp, kd, 100);
 	joint->setDrive(PxArticulationAxis::eSWING1, kp, kd, 100);
 	joint->setDrive(PxArticulationAxis::eSWING2, kp, kd, 100);
+}
+
+static void genRevoluteJoint(PxArticulationJointReducedCoordinate *&joint, string name,
+	PxArticulationLink *link, PxArticulationAxis::Enum axis,
+	PxTransform parentPose, PxTransform childPose) {
+	joint = static_cast<PxArticulationJointReducedCoordinate*>(link->getInboundJoint());
+	joint->setJointType(PxArticulationJointType::eREVOLUTE);
+	joint->setParentPose(parentPose);
+	joint->setChildPose(childPose);
+	joint->setMotion(axis, PxArticulationMotion::eFREE);
+
+	PxReal kp = getConfigF("P_KP_" + name);
+	PxReal kd = getConfigF("P_KD_" + name);
+
+	joint->setDrive(axis, kp, kd, 100);
 }
 
 static PxQuat rtz(PxPi / 2, PxVec3(0, 0, 1));
@@ -66,6 +83,26 @@ static void loadNeck(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	);
 }
 
+static void loadRKnee(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
+	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, -1.686184f, 0.f);
+	PxVec3 linkOffset = jointOffset + PxVec3(0.f, -0.8f, 0.f);
+	genCapsuleLink(rKnee, rHip, PxTransform(linkOffset, rtz), 0.20f, 1.24f, 3.f);
+	genRevoluteJoint(jRHipRKnee, "jRHipRKnee", rKnee, PxArticulationAxis::eSWING2,
+		getJointPose(jointOffset - prevLinkOffset),
+		getJointPose(jointOffset - linkOffset)
+	);
+}
+
+static void loadLKnee(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
+	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, -1.686184f, 0.f);
+	PxVec3 linkOffset = jointOffset + PxVec3(0.f, -0.8f, 0.f);
+	genCapsuleLink(lKnee, lHip, PxTransform(linkOffset, rtz), 0.20f, 1.24f, 3.f);
+	genRevoluteJoint(jLHipLKnee, "jLHipLKnee", lKnee, PxArticulationAxis::eSWING2,
+		getJointPose(jointOffset - prevLinkOffset),
+		getJointPose(jointOffset - linkOffset)
+	);
+}
+
 static void loadRHip(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, 0.f, 0.339548f);
 	PxVec3 linkOffset = jointOffset + PxVec3(0.f, -0.84f, 0.f);
@@ -74,6 +111,7 @@ static void loadRHip(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 		getJointPose(jointOffset - prevLinkOffset),
 		getJointPose(jointOffset - linkOffset)
 	);
+	loadRKnee(jointOffset, linkOffset);
 }
 
 static void loadLHip(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
@@ -84,6 +122,7 @@ static void loadLHip(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 		getJointPose(jointOffset - prevLinkOffset),
 		getJointPose(jointOffset - linkOffset)
 	);
+	loadLKnee(jointOffset, linkOffset);
 }
 
 static void loadChest(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {

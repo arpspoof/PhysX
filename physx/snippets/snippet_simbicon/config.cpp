@@ -19,6 +19,7 @@ static Config default_config{
 	{ "C_DYNAMIC_FRICTION", _C(1.0f) },
 	// CONSTANTS
 	{ "C_GRAVITY", _C(9.81f) },
+	{ "C_TWIST_LIMIT", _C(0.7f) },
 	// PARAMS
 	{ "P_KP_jRootChest", _C(500.0f) },
 	{ "P_KD_jRootChest", _C(100.0f) },

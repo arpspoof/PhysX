@@ -9,16 +9,14 @@ extern PxArticulationLink* link2;
 
 PxReal twistTarget, swing1Target, swing2Target;
 
-extern PxArticulationJointReducedCoordinate *jRootChest;
+extern PxArticulationJointReducedCoordinate *jRootChest, *jRootRHip, *jRootLHip;
 extern PxArticulationJointReducedCoordinate *jChestNeck;
+extern PxArticulationJointReducedCoordinate *jRHipRKnee, *jLHipLKnee;
 
 void control(PxReal /*dt*/) {
-	jRootChest->setDriveTarget(PxArticulationAxis::eTWIST, 0);
-	jRootChest->setDriveTarget(PxArticulationAxis::eSWING1, 0);
-	jRootChest->setDriveTarget(PxArticulationAxis::eSWING2, 0);
-	jChestNeck->setDriveTarget(PxArticulationAxis::eTWIST, twistTarget);
-	jChestNeck->setDriveTarget(PxArticulationAxis::eSWING1, swing1Target);
-	jChestNeck->setDriveTarget(PxArticulationAxis::eSWING2, swing2Target);
+//	jLHipLKnee->setDriveTarget(PxArticulationAxis::eTWIST, twistTarget);
+//	jLHipLKnee->setDriveTarget(PxArticulationAxis::eSWING1, swing1Target);
+	jLHipLKnee->setDriveTarget(PxArticulationAxis::eSWING2, swing2Target);
 }
 
 void control5(PxReal /*dt*/) {
