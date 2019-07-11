@@ -19,6 +19,31 @@ static Config default_config{
 	{ "C_DYNAMIC_FRICTION", _C(1.0f) },
 	// CONSTANTS
 	{ "C_GRAVITY", _C(9.81f) },
+	// PARAMS
+	{ "P_KP_jRootChest", _C(500.0f) },
+	{ "P_KD_jRootChest", _C(100.0f) },
+	{ "P_KP_jChestNeck", _C(50.0f) },
+	{ "P_KD_jChestNeck", _C(10.0f) },
+	{ "P_KP_jRootRHip", _C(250.0f) },
+	{ "P_KD_jRootRHip", _C(50.0f) },
+	{ "P_KP_jRootLHip", _C(250.0f) },
+	{ "P_KD_jRootLHip", _C(50.0f) },
+	{ "P_KP_jRHipRKnee", _C(250.0f) },
+	{ "P_KD_jRHipRKnee", _C(50.0f) },
+	{ "P_KP_jLHipLKnee", _C(250.0f) },
+	{ "P_KD_jLHipLKnee", _C(50.0f) },
+	{ "P_KP_jRKneeRAnkle", _C(50.0f) },
+	{ "P_KD_jRKneeRAnkle", _C(40.0f) },
+	{ "P_KP_jLKneeLAnkle", _C(50.0f) },
+	{ "P_KD_jLKneeLAnkle", _C(40.0f) },
+	{ "P_KP_jChestRShoulder", _C(200.0f) },
+	{ "P_KD_jChestRShoulder", _C(40.0f) },
+	{ "P_KP_jChestLShoulder", _C(200.0f) },
+	{ "P_KD_jChestLShoulder", _C(40.0f) },
+	{ "P_KP_jRShoulderRElbow", _C(150.0f) },
+	{ "P_KD_jRShoulderRElbow", _C(30.0f) },
+	{ "P_KP_jLShoulderLElbow", _C(150.0f) },
+	{ "P_KD_jLShoulderLElbow", _C(30.0f) },
 };
 
 static const char* config_file_path = nullptr;
