@@ -79,7 +79,7 @@ void loadNeck(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, 0.895576f, 0.f);
 	PxVec3 linkOffset = jointOffset + PxVec3(0.f, 0.7f, 0.f);
 	genSphereLink(neck, chest, PxTransform(linkOffset, rtz), 0.41f, 2.f);
-	genSphericalJoint(jChestNeck, "jChestNeck", neck,
+	genSphericalJoint(jChestNeck, "neck", neck,
 		getJointPose(jointOffset - prevLinkOffset),
 		getJointPose(jointOffset - linkOffset)
 	);
@@ -131,14 +131,14 @@ void loadChest(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, 0.944604f, 0.f);
 	PxVec3 linkOffset = jointOffset + PxVec3(0.f, 0.48f, 0.f);
 	genSphereLink(chest, root, PxTransform(linkOffset, rtz), 0.44f, 14.f);
-	genSphericalJoint(jRootChest, "jRootChest", chest, 
+	genSphericalJoint(jRootChest, "chest", chest, 
 		getJointPose(jointOffset - prevLinkOffset), 
 		getJointPose(jointOffset - linkOffset)
 	);
 	loadNeck(jointOffset, linkOffset);
 }
 
-void loadRoot4() {
+void loadRoot8() {
 	PxReal baseHeight = getConfigF("T_BASE_HEIGHT");
 	PxVec3 baseOffset(0.f, baseHeight, 0.f);
 
@@ -148,15 +148,15 @@ void loadRoot4() {
 	PxVec3 rootJointOffset = baseOffset;
 	PxVec3 rootLinkOffset = baseOffset + PxVec3(0.f, 0.28f, 0.f);
 
-	genSphereLink(root, base, PxTransform(rootLinkOffset, rtz), 0.36f, 600.0f);
+	genSphereLink(root, base, PxTransform(rootLinkOffset, rtz), 0.36f, 6.0f);
 	auto jBaseRoot = static_cast<PxArticulationJointReducedCoordinate*>(root->getInboundJoint());
 	jBaseRoot->setJointType(PxArticulationJointType::eFIX);
 	jBaseRoot->setParentPose(getJointPose(rootJointOffset - baseOffset));
 	jBaseRoot->setChildPose(getJointPose(rootJointOffset - rootLinkOffset));
 
 	loadChest(rootJointOffset, rootLinkOffset);
-	loadRHip(rootJointOffset, rootLinkOffset);
-	loadLHip(rootJointOffset, rootLinkOffset);
+//	loadRHip(rootJointOffset, rootLinkOffset);
+//	loadLHip(rootJointOffset, rootLinkOffset);
 }
 
 // Link bodies
@@ -164,15 +164,29 @@ NULLLinkBody bodyBase;
 SphereLinkBody bodyRoot(6.f, 0.36f);
 SphereLinkBody bodyChest(14.f, 0.48f);
 SphereLinkBody bodyNeck(2.f, 0.41f);
+CapsuleLinkBody bodyHip(4.5f, 0.22f, 1.2f);
+CapsuleLinkBody bodyKnee(3.f, 0.2f, 1.24f);
 
 // Descriptions
 NULLDescriptionNode descrBase("base", &bodyBase);
-FixedDescriptionNode descrRoot("root", "root", &bodyRoot, PxVec3(0, 0.28f, 0), PxVec3(0, 0, 0));
-SpericalDescriptionNode descrChest("chest", "chest", &bodyChest, PxVec3(0, 0.48f, 0), PxVec3(0, 0.944604f, 0));
-SpericalDescriptionNode descrNeck("neck", "neck", &bodyNeck, PxVec3(0, 0.7f, 0), PxVec3(0, 0.895576f, 0));
+FixedDescriptionNode descrRoot("root", "root", &bodyRoot, 
+	PxVec3(0, 0.28f, 0), PxVec3(0, 0, 0));
+SpericalDescriptionNode descrChest("chest", "chest", &bodyChest, 
+	PxVec3(0, 0.48f, 0), PxVec3(0, 0.944604f, 0));
+SpericalDescriptionNode descrNeck("neck", "neck", &bodyNeck, 
+	PxVec3(0, 0.7f, 0), PxVec3(0, 0.895576f, 0));
+SpericalDescriptionNode descrRHip("right_hip", "right_hip", &bodyHip, 
+	PxVec3(0, -0.84f, 0), PxVec3(0, 0, 0.339548f));
+SpericalDescriptionNode descrLHip("left_hip", "left_hip", &bodyHip, 
+	PxVec3(0, -0.84f, 0), PxVec3(0, 0, -0.339548f));
+RevoluteDescriptionNode descrRKnee("right_knee", "right_knee", &bodyKnee, PxArticulationAxis::eSWING2,
+	PxVec3(0, -0.8f, 0), PxVec3(0, -1.686184f, 0));
+RevoluteDescriptionNode descrLKnee("left_knee", "left_knee", &bodyKnee, PxArticulationAxis::eSWING2,
+	PxVec3(0, -0.8f, 0), PxVec3(0, -1.686184f, 0));
+
+Articulation ar;
 
 void loadRoot() {
-	Articulation ar;
 	ArticulationTree arTree;
 
 	arTree.addNULLDescriptionNode(descrBase);
@@ -186,6 +200,18 @@ void loadRoot() {
 
 	arTree.addSpericalDescriptionNode(descrNeck);
 	arTree.connect("chest", "neck");
+
+	arTree.addSpericalDescriptionNode(descrRHip);
+	arTree.connect("root", "right_hip");
+
+	arTree.addSpericalDescriptionNode(descrLHip);
+	arTree.connect("root", "left_hip");
+
+	arTree.addRevoluteDescriptionNode(descrRKnee);
+	arTree.connect("right_hip", "right_knee");
+
+	arTree.addRevoluteDescriptionNode(descrLKnee);
+	arTree.connect("left_hip", "left_knee");
 
 	arTree.buildArticulation(ar);
 }
