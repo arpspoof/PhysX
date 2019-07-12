@@ -27,7 +27,7 @@ void driveRevolute(Joint *j) {
 }
 
 void control(PxReal /*dt*/) {
-	driveSpherical(ar.jointMap["chest"]);
+	driveSpherical(ar.jointMap["neck"]);
 //	driveRevolute(ar.jointMap["right_ankle"]);
 }
 

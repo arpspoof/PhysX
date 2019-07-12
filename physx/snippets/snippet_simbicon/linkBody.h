@@ -41,7 +41,8 @@ public:
 		return mass / (lenX * lenY * lenZ);
 	}
 	BoxLinkBody(float mass, float lenX, float lenY, float lenZ)
-		:LinkBody(mass, new physx::PxBoxGeometry(lenX / 2, lenY / 2, lenZ / 2)) {
+		:LinkBody(mass, new physx::PxBoxGeometry(lenX / 2, lenY / 2, lenZ / 2)),
+		lenX(lenX), lenY(lenY), lenZ(lenZ) {
 	}
 };
 
