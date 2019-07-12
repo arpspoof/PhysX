@@ -1,8 +1,10 @@
 #include "robot.h"
 #include "config.h"
 #include "globals.h"
+#include "articulationTree.h"
 
 #include <iostream>
+#include <string>
 
 using namespace physx;
 using namespace std;
@@ -73,7 +75,7 @@ static PxTransform getJointPose(PxVec3 offset) {
 	return PxTransform(rtzinv.rotate(offset));
 }
 
-static void loadNeck(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
+void loadNeck(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, 0.895576f, 0.f);
 	PxVec3 linkOffset = jointOffset + PxVec3(0.f, 0.7f, 0.f);
 	genSphereLink(neck, chest, PxTransform(linkOffset, rtz), 0.41f, 2.f);
@@ -83,7 +85,7 @@ static void loadNeck(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	);
 }
 
-static void loadRKnee(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
+void loadRKnee(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, -1.686184f, 0.f);
 	PxVec3 linkOffset = jointOffset + PxVec3(0.f, -0.8f, 0.f);
 	genCapsuleLink(rKnee, rHip, PxTransform(linkOffset, rtz), 0.20f, 1.24f, 3.f);
@@ -93,7 +95,7 @@ static void loadRKnee(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	);
 }
 
-static void loadLKnee(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
+void loadLKnee(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, -1.686184f, 0.f);
 	PxVec3 linkOffset = jointOffset + PxVec3(0.f, -0.8f, 0.f);
 	genCapsuleLink(lKnee, lHip, PxTransform(linkOffset, rtz), 0.20f, 1.24f, 3.f);
@@ -103,7 +105,7 @@ static void loadLKnee(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	);
 }
 
-static void loadRHip(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
+void loadRHip(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, 0.f, 0.339548f);
 	PxVec3 linkOffset = jointOffset + PxVec3(0.f, -0.84f, 0.f);
 	genCapsuleLink(rHip, root, PxTransform(linkOffset, rtz), 0.22f, 1.2f, 4.5f);
@@ -114,7 +116,7 @@ static void loadRHip(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	loadRKnee(jointOffset, linkOffset);
 }
 
-static void loadLHip(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
+void loadLHip(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, 0.f, -0.339548f);
 	PxVec3 linkOffset = jointOffset + PxVec3(0.f, -0.84f, 0.f);
 	genCapsuleLink(lHip, root, PxTransform(linkOffset, rtz), 0.22f, 1.2f, 4.5f);
@@ -125,7 +127,7 @@ static void loadLHip(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	loadLKnee(jointOffset, linkOffset);
 }
 
-static void loadChest(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
+void loadChest(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	PxVec3 jointOffset = prevJointOffset + PxVec3(0.f, 0.944604f, 0.f);
 	PxVec3 linkOffset = jointOffset + PxVec3(0.f, 0.48f, 0.f);
 	genSphereLink(chest, root, PxTransform(linkOffset, rtz), 0.44f, 14.f);
@@ -136,7 +138,7 @@ static void loadChest(PxVec3 prevJointOffset, PxVec3 prevLinkOffset) {
 	loadNeck(jointOffset, linkOffset);
 }
 
-void loadRoot() {
+void loadRoot4() {
 	PxReal baseHeight = getConfigF("T_BASE_HEIGHT");
 	PxVec3 baseOffset(0.f, baseHeight, 0.f);
 
@@ -155,4 +157,35 @@ void loadRoot() {
 	loadChest(rootJointOffset, rootLinkOffset);
 	loadRHip(rootJointOffset, rootLinkOffset);
 	loadLHip(rootJointOffset, rootLinkOffset);
+}
+
+// Link bodies
+NULLLinkBody bodyBase;
+SphereLinkBody bodyRoot(6.f, 0.36f);
+SphereLinkBody bodyChest(14.f, 0.48f);
+SphereLinkBody bodyNeck(2.f, 0.41f);
+
+// Descriptions
+NULLDescriptionNode descrBase("base", &bodyBase);
+FixedDescriptionNode descrRoot("root", "root", &bodyRoot, PxVec3(0, 0.28f, 0), PxVec3(0, 0, 0));
+SpericalDescriptionNode descrChest("chest", "chest", &bodyChest, PxVec3(0, 0.48f, 0), PxVec3(0, 0.944604f, 0));
+SpericalDescriptionNode descrNeck("neck", "neck", &bodyNeck, PxVec3(0, 0.7f, 0), PxVec3(0, 0.895576f, 0));
+
+void loadRoot() {
+	Articulation ar;
+	ArticulationTree arTree;
+
+	arTree.addNULLDescriptionNode(descrBase);
+	arTree.setRoot("base");
+
+	arTree.addFixedDescriptionNode(descrRoot);
+	arTree.connect("base", "root");
+
+	arTree.addSpericalDescriptionNode(descrChest);
+	arTree.connect("root", "chest");
+
+	arTree.addSpericalDescriptionNode(descrNeck);
+	arTree.connect("chest", "neck");
+
+	arTree.buildArticulation(ar);
 }

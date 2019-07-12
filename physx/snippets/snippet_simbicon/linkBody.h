@@ -1,14 +1,37 @@
 #pragma once
 
 #include <PxPhysicsAPI.h>
+#include <cassert>
 
 class LinkBody {
 public:
+	bool hasGeometry;
 	float mass;
+	physx::PxGeometry *geometry;
+	virtual physx::PxGeometry& getGeometry() const {
+		return *geometry;
+	}
 	virtual float getDensity() const = 0;
-	virtual physx::PxGeometry getGeometry() const = 0;
+	virtual ~LinkBody() {
+		delete geometry;
+	}
 protected:
-	LinkBody(float mass) :mass(mass) {}
+	LinkBody(float mass, physx::PxGeometry *geometry) 
+		:mass(mass), hasGeometry(true), geometry(geometry) {}
+};
+
+class NULLLinkBody : public LinkBody {
+public:
+	float getDensity() const override {
+		return 1;
+	}
+	NULLLinkBody() :LinkBody(1, NULL) {
+		hasGeometry = false;
+	}
+	physx::PxGeometry& getGeometry() const override {
+		assert(false);
+		return *geometry;
+	}
 };
 
 class SphereLinkBody : public LinkBody {
@@ -18,10 +41,10 @@ public:
 		return mass / (4.0f / 3.0f*physx::PxPi*radius*radius*radius);
 	}
 	SphereLinkBody(float mass, float radius)
-		:LinkBody(mass), radius(radius) {
-	}
-	physx::PxGeometry getGeometry() const override {
-		return physx::PxSphereGeometry(radius);
+		:LinkBody(mass, 
+			/*new physx::PxSphereGeometry(radius)),*/
+			new physx::PxBoxGeometry(radius, radius, radius)),
+		radius(radius) {
 	}
 };
 
@@ -36,9 +59,7 @@ public:
 		);
 	}
 	CapsuleLinkBody(float mass, float radius, float length)
-		:LinkBody(mass), radius(radius), length(length) {
-	}
-	physx::PxGeometry getGeometry() const override {
-		return physx::PxCapsuleGeometry(radius, length / 2);
+		:LinkBody(mass, new physx::PxCapsuleGeometry(radius, length / 2)), 
+		radius(radius), length(length) {
 	}
 };
