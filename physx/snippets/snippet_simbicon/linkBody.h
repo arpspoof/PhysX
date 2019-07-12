@@ -34,6 +34,17 @@ public:
 	}
 };
 
+class BoxLinkBody : public LinkBody {
+public:
+	float lenX, lenY, lenZ;
+	float getDensity() const override {
+		return mass / (lenX * lenY * lenZ);
+	}
+	BoxLinkBody(float mass, float lenX, float lenY, float lenZ)
+		:LinkBody(mass, new physx::PxBoxGeometry(lenX / 2, lenY / 2, lenZ / 2)) {
+	}
+};
+
 class SphereLinkBody : public LinkBody {
 public:
 	float radius;

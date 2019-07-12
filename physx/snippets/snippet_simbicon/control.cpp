@@ -27,8 +27,8 @@ void driveRevolute(Joint *j) {
 }
 
 void control(PxReal /*dt*/) {
-//	driveSpherical(ar.jointMap["right_hip"]);
-	driveRevolute(ar.jointMap["right_knee"]);
+//	driveSpherical(ar.jointMap["right_shoulder"]);
+	driveRevolute(ar.jointMap["right_ankle"]);
 }
 
 static bool gClosing = true;

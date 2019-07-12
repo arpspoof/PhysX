@@ -16,6 +16,10 @@ SphereLinkBody bodyChest(14.f, 0.48f);
 SphereLinkBody bodyNeck(2.f, 0.41f);
 CapsuleLinkBody bodyHip(4.5f, 0.22f, 1.2f);
 CapsuleLinkBody bodyKnee(3.f, 0.2f, 1.24f);
+CapsuleLinkBody bodyShoulder(1.5f, 0.18f, 0.72f);
+CapsuleLinkBody bodyElbow(1.f, 0.16f, 0.54f);
+SphereLinkBody bodyWrist(0.5f, 0.16f);
+BoxLinkBody bodyAnkle(1.0f, 0.22f, 0.708f, 0.36f); // note: switch x and y
 
 // Descriptions
 NULLDescriptionNode descrBase("base", &bodyBase);
@@ -33,6 +37,22 @@ RevoluteDescriptionNode descrRKnee("right_knee", "right_knee", &bodyKnee, PxArti
 	PxVec3(0, -0.8f, 0), PxVec3(0, -1.686184f, 0));
 RevoluteDescriptionNode descrLKnee("left_knee", "left_knee", &bodyKnee, PxArticulationAxis::eSWING2,
 	PxVec3(0, -0.8f, 0), PxVec3(0, -1.686184f, 0));
+SpericalDescriptionNode descrRShoulder("right_shoulder", "right_shoulder", &bodyShoulder,
+	PxVec3(0, -0.56f, 0), PxVec3(-0.096200f, 0.974000f, 0.732440f));
+SpericalDescriptionNode descrLShoulder("left_shoulder", "left_shoulder", &bodyShoulder,
+	PxVec3(0, -0.56f, 0), PxVec3(-0.096200f, 0.974000f, -0.732440f));
+RevoluteDescriptionNode descrRElbow("right_elbow", "right_elbow", &bodyElbow, PxArticulationAxis::eSWING2,
+	PxVec3(0, -0.48f, 0), PxVec3(0, -1.099152f, 0));
+RevoluteDescriptionNode descrLElbow("left_elbow", "left_elbow", &bodyElbow, PxArticulationAxis::eSWING2,
+	PxVec3(0, -0.48f, 0), PxVec3(0, -1.099152f, 0));
+FixedDescriptionNode descrRWrist("right_wrist", "right_wrist", &bodyWrist,
+	PxVec3(0, 0, 0), PxVec3(0, -1.035788f, 0));
+FixedDescriptionNode descrLWrist("left_wrist", "left_wrist", &bodyWrist,
+	PxVec3(0, 0, 0), PxVec3(0, -1.035788f, 0));
+RevoluteDescriptionNode descrRAnkle("right_ankle", "right_ankle", &bodyAnkle, PxArticulationAxis::eSWING2,
+	PxVec3(0.18f, -0.09f, 0), PxVec3(0, -1.63948f, 0));
+RevoluteDescriptionNode descrLAnkle("left_ankle", "left_ankle", &bodyAnkle, PxArticulationAxis::eSWING2,
+	PxVec3(0.18f, -0.09f, 0), PxVec3(0, -1.63948f, 0));
 
 Articulation ar;
 
@@ -62,6 +82,30 @@ void loadRoot() {
 
 	arTree.addRevoluteDescriptionNode(descrLKnee);
 	arTree.connect("left_hip", "left_knee");
+
+	arTree.addRevoluteDescriptionNode(descrRAnkle);
+	arTree.connect("right_knee", "right_ankle");
+
+	arTree.addRevoluteDescriptionNode(descrLAnkle);
+	arTree.connect("left_knee", "left_ankle");
+
+	arTree.addSpericalDescriptionNode(descrRShoulder);
+	arTree.connect("chest", "right_shoulder");
+
+	arTree.addSpericalDescriptionNode(descrLShoulder);
+	arTree.connect("chest", "left_shoulder");
+
+	arTree.addRevoluteDescriptionNode(descrRElbow);
+	arTree.connect("right_shoulder", "right_elbow");
+
+	arTree.addRevoluteDescriptionNode(descrLElbow);
+	arTree.connect("left_shoulder", "left_elbow");
+
+	arTree.addFixedDescriptionNode(descrRWrist);
+	arTree.connect("right_elbow", "right_wrist");
+
+	arTree.addFixedDescriptionNode(descrLWrist);
+	arTree.connect("left_elbow", "left_wrist");
 
 	arTree.buildArticulation(ar);
 }
