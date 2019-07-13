@@ -11,14 +11,15 @@ extern PxFoundation*			gFoundation;
 extern PxPhysics*				gPhysics;
 
 extern PxDefaultCpuDispatcher*	gDispatcher;
-extern PxScene*				gScene;
+extern PxScene*					gScene;
 
 extern PxMaterial*				gMaterial;
 
-extern PxPvd*                  gPvd;
+extern PxPvd*					gPvd;
 
-extern PxArticulationReducedCoordinate*		gArticulation;
+extern PxArticulationReducedCoordinate*			gArticulation;
 extern PxArticulationJointReducedCoordinate*	gDriveJoint;
+extern PxArticulationCache*						gCache;
 
 void loader();
 void control(PxReal dt);

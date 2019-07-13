@@ -27,6 +27,7 @@ PxMaterial*				gMaterial		= NULL;
 PxPvd*                  gPvd			= NULL;
 
 PxArticulationReducedCoordinate*		gArticulation = NULL;
+PxArticulationCache*					gCache = NULL;
 PxArticulationJointReducedCoordinate*	gDriveJoint = NULL;
 
 void initPhysics(bool /*interactive*/)
@@ -88,6 +89,9 @@ void initPhysics(bool /*interactive*/)
 	loader();
 
 	gScene->addArticulation(*gArticulation);
+
+	gCache = gArticulation->createCache();
+	gArticulation->commonInit();
 }
 
 void stepPhysics(bool /*interactive*/)

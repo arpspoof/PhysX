@@ -26,9 +26,59 @@ void driveRevolute(Joint *j) {
 	rev->joint->setDriveTarget(rev->axis, target);
 }
 
-void control(PxReal /*dt*/) {
+/*
+
+chest			0, 1, 2
+right_hip		3, 4, 5
+left_hip		6, 7, 8
+neck			9, 10, 11
+
+*/
+
+void control5(PxReal /*dt*/) {
+	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
+	PxReal *vs = gCache->jointVelocity;
+	PxVec3 redu(vs[9], vs[10], vs[11]);
+	redu.normalize();
+	printf("reduc: %f %f %f\n", redu[0], redu[1], redu[2]);
+/*	for (int i = 0; i < 100; i++) {
+		cout << maxim[i] << " ";
+	}
+	cout << endl;*/
+//	gArticulation->applyCache(*gCache, PxArticulationCache::eALL);
+//	PxVec3 prevF(forces[9], forces[10], forces[11]);
+	twistTarget = 1.0f;
+	swing1Target = 1.f;
+	swing2Target = 2.0f;
 	driveSpherical(ar.jointMap["neck"]);
+	PxQuat tq(1.f, PxVec3(1, 0, 0));
+	PxVec3 sw(0, 1, 2);
+	PxQuat ts(sw.magnitude(), sw.getNormalized());
+	PxQuat hy = ts * tq;
+	PxVec3 img(hy.x, hy.y, hy.z);
+	img.normalize();
+	printf("axis : %f %f %f\n", img[0], img[1], img[2]);
+/*	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
+	forces = gCache->jointForce;
+	PxVec3 postF(forces[9], forces[10], forces[11]);
+	printf("prev: %f, %f, %f\npost: %f, %f, %f\n",
+		prevF[0], prevF[1], prevF[2],
+		postF[0], postF[1], postF[2]);*/
 //	driveRevolute(ar.jointMap["right_ankle"]);
+}
+
+void control(PxReal /*dt*/) {
+/*	twistTarget = 1.0f;
+	swing1Target = 1.f;
+	swing2Target = 2.0f;*/
+	//driveSpherical(ar.jointMap["neck"]);
+	/*	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
+	forces = gCache->jointForce;
+	PxVec3 postF(forces[9], forces[10], forces[11]);
+	printf("prev: %f, %f, %f\npost: %f, %f, %f\n",
+	prevF[0], prevF[1], prevF[2],
+	postF[0], postF[1], postF[2]);*/
+	//	driveRevolute(ar.jointMap["right_ankle"]);
 }
 
 static bool gClosing = true;
