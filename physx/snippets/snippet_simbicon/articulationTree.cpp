@@ -85,7 +85,7 @@ Link* ArticulationDescriptionNode::createLink(Articulation& ar, Link *parentLink
 		);
 		link->inboundJoint = joint;
 		joint->globalPositionOffset = jointPos;
-		joint->enableDrive(jointName);
+	//	joint->enableDrive(jointName);
 	}
 	return link;
 }

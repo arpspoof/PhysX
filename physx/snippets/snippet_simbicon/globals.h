@@ -22,5 +22,6 @@ extern PxArticulationJointReducedCoordinate*	gDriveJoint;
 extern PxArticulationCache*						gCache;
 
 void loader();
+void initControl();
 void control(PxReal dt);
 void keyHandler(unsigned char key, const PxTransform& /*camera*/);
