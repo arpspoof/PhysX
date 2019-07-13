@@ -45,6 +45,18 @@ static Config default_config{
 	{ "P_KD_right_elbow", _C(30.0f) },
 	{ "P_KP_left_elbow", _C(150.0f) },
 	{ "P_KD_left_elbow", _C(30.0f) },
+	{ "P_FL_left_shoulder", _C(100.0f) },
+	{ "P_FL_neck", _C(50.0f) },
+	{ "P_FL_right_shoulder", _C(100.0f) },
+	{ "P_FL_left_knee", _C(150.0f) },
+	{ "P_FL_left_ankle", _C(100.0f) },
+	{ "P_FL_left_elbow", _C(60.0f) },
+	{ "P_FL_right_knee", _C(150.0f) },
+	{ "P_FL_right_ankle", _C(100.0f) },
+	{ "P_FL_right_elbow", _C(60.0f) },
+	{ "P_FL_chest", _C(200.0f) },
+	{ "P_FL_left_hip", _C(200.0f) },
+	{ "P_FL_right_hip", _C(200.0f) },
 };
 
 static const char* config_file_path = nullptr;

@@ -39,10 +39,11 @@ SphericalJoint::SphericalJoint(Link *link, PxTransform parentPose, PxTransform c
 void SphericalJoint::enableDrive(std::string name) {
 	PxReal kp = getConfigF("P_KP_" + name);
 	PxReal kd = getConfigF("P_KD_" + name);
+	PxReal fl = getConfigF("P_FL_" + name);
 
-	joint->setDrive(PxArticulationAxis::eTWIST, kp, kd, 100);
-	joint->setDrive(PxArticulationAxis::eSWING1, kp, kd, 100);
-	joint->setDrive(PxArticulationAxis::eSWING2, kp, kd, 100);
+	joint->setDrive(PxArticulationAxis::eTWIST, kp, kd, fl);
+	joint->setDrive(PxArticulationAxis::eSWING1, kp, kd, fl);
+	joint->setDrive(PxArticulationAxis::eSWING2, kp, kd, fl);
 }
 
 RevoluteJoint::RevoluteJoint(Link *link, PxArticulationAxis::Enum axis,
@@ -55,8 +56,9 @@ RevoluteJoint::RevoluteJoint(Link *link, PxArticulationAxis::Enum axis,
 void RevoluteJoint::enableDrive(std::string name) {
 	PxReal kp = getConfigF("P_KP_" + name);
 	PxReal kd = getConfigF("P_KD_" + name);
+	PxReal fl = getConfigF("P_FL_" + name);
 
-	joint->setDrive(axis, kp, kd, 100);
+	joint->setDrive(axis, kp, kd, fl);
 }
 
 Link::Link(Link *parent, PxTransform transform, LinkBody *body) :parentLink(parent) {
