@@ -2,6 +2,7 @@
 #include "euler.h"
 #include "config.h"
 #include "articulationTree.h"
+#include "simbicon.h"
 
 PxReal twistTarget, swing1Target, swing2Target;
 
@@ -94,12 +95,14 @@ void initControl() {
 	}
 }
 
-void control(PxReal /*dt*/) {
+void control(PxReal dt, int contactFlag) {
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
-	targetPositions[3] = twistTarget;
-	targetPositions[4] = swing1Target;
-	targetPositions[5] = swing2Target;
+	targetPositions = vector<float>(24, 0.f);
+	targetVelocities = vector<float>(24, 0.f);
+
+	simbicon_tick(dt, contactFlag);
+	simbicon_setTargets();
 
 	PxReal *positions = gCache->jointPosition;
 	PxReal *velocities = gCache->jointVelocity;
@@ -111,6 +114,8 @@ void control(PxReal /*dt*/) {
 			forces[i] = fls[i];
 		}
 	}
+
+	simbicon_updateForces();
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 }

@@ -7,6 +7,7 @@
 #include "config.h"
 #include "globals.h"
 #include "articulationTree.h"
+#include "simbicon.h"
 
 #include "../snippetutils/SnippetUtils.h"
 #include "../snippetcommon/SnippetPrint.h"
@@ -55,11 +56,14 @@ PxFilterFlags collisionShader(
 	return PxFilterFlag::eDEFAULT;
 }
 
+static int contactFlag = 0;
+
 void onContactGround(PxU32 objGroup) {
 	if (objGroup & CollisionGroup::LeftFoot) {
-		printf("left foot contact ground ...\n");
-	} else if (objGroup & CollisionGroup::RightFoot) {
-		printf("right foot contact ground ...\n");
+		contactFlag |= SIMBICON_LFOOT_CONTACT;
+	}
+	if (objGroup & CollisionGroup::RightFoot) {
+		contactFlag |= SIMBICON_RFOOT_CONTACT;
 	}
 }
 
@@ -192,7 +196,9 @@ void initPhysics(bool /*interactive*/)
 void stepPhysics(bool /*interactive*/)
 {
 	const PxReal dt = getConfigF("C_TIME_STEP");
-	control(dt);
+
+	control(dt, contactFlag);
+	contactFlag = 0;
 
 	gScene->simulate(dt);
 	gScene->fetchResults(true);

@@ -24,7 +24,7 @@ extern PxArticulationCache*						gCache;
 
 void loader();
 void initControl();
-void control(PxReal dt);
+void control(PxReal dt, int contactFlag);
 void keyHandler(unsigned char key, const PxTransform& /*camera*/);
 void setupFiltering(PxRigidActor* actor, PxU32 filterGroup, PxU32 filterMask);
 
