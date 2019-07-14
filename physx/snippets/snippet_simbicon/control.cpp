@@ -97,9 +97,9 @@ void initControl() {
 void control(PxReal /*dt*/) {
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
-	targetPositions[12] = twistTarget;
-	targetPositions[13] = swing1Target;
-	targetPositions[14] = swing2Target;
+	targetPositions[3] = twistTarget;
+	targetPositions[4] = swing1Target;
+	targetPositions[5] = swing2Target;
 
 	PxReal *positions = gCache->jointPosition;
 	PxReal *velocities = gCache->jointVelocity;

@@ -10,6 +10,7 @@
 compiler/
 PhysX/include/
 PhysX/install/
+physx/samples/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

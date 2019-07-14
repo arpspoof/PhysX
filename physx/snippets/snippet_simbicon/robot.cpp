@@ -9,6 +9,8 @@
 using namespace physx;
 using namespace std;
 
+extern Articulation ar;
+
 // Link bodies
 NULLLinkBody bodyBase;
 SphereLinkBody bodyRoot(6.f, 0.36f);
@@ -53,8 +55,6 @@ RevoluteDescriptionNode descrRAnkle("right_ankle", "right_ankle", &bodyAnkle, Px
 	PxVec3(0.18f, -0.09f, 0), PxVec3(0, -1.63948f, 0));
 RevoluteDescriptionNode descrLAnkle("left_ankle", "left_ankle", &bodyAnkle, PxArticulationAxis::eSWING2,
 	PxVec3(0.18f, -0.09f, 0), PxVec3(0, -1.63948f, 0));
-
-Articulation ar;
 
 void loadRoot() {
 	ArticulationTree arTree;
@@ -108,4 +108,9 @@ void loadRoot() {
 	arTree.connect("left_elbow", "left_wrist");
 
 	arTree.buildArticulation(ar);
+
+	auto rightFoot = ar.linkMap["right_ankle"]->link;
+	auto leftFoot = ar.linkMap["left_ankle"]->link;
+	setupFiltering(rightFoot, CollisionGroup::RightFoot, CollisionGroup::Ground);
+	setupFiltering(leftFoot, CollisionGroup::LeftFoot, CollisionGroup::Ground);
 }

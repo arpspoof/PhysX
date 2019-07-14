@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PxPhysicsAPI.h"
+#include "articulationTree.h"
 
 using namespace physx;
 
@@ -25,3 +26,10 @@ void loader();
 void initControl();
 void control(PxReal dt);
 void keyHandler(unsigned char key, const PxTransform& /*camera*/);
+void setupFiltering(PxRigidActor* actor, PxU32 filterGroup, PxU32 filterMask);
+
+enum CollisionGroup {
+	Ground = 1 << 0,
+	LeftFoot = 1 << 1,
+	RightFoot = 1 << 2
+};

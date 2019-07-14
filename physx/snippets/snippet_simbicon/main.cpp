@@ -6,6 +6,7 @@
 #include "PxPhysicsAPI.h"
 #include "config.h"
 #include "globals.h"
+#include "articulationTree.h"
 
 #include "../snippetutils/SnippetUtils.h"
 #include "../snippetcommon/SnippetPrint.h"
@@ -30,6 +31,88 @@ PxArticulationReducedCoordinate*		gArticulation = NULL;
 PxArticulationCache*					gCache = NULL;
 PxArticulationJointReducedCoordinate*	gDriveJoint = NULL;
 
+Articulation ar;
+
+PxFilterFlags collisionShader(
+	PxFilterObjectAttributes attributes0, PxFilterData filterData0,
+	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+	PxPairFlags& pairFlags, const void* /*constantBlock*/, PxU32 /*constantBlockSize*/)
+{
+	// let triggers through
+	if (PxFilterObjectIsTrigger(attributes0) || PxFilterObjectIsTrigger(attributes1))
+	{
+		pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
+		return PxFilterFlag::eDEFAULT;
+	}
+	// generate contacts for all that were not filtered above
+	pairFlags = PxPairFlag::eCONTACT_DEFAULT;
+
+	// trigger the contact callback for pairs (A,B) where 
+	// the filtermask of A contains the ID of B and vice versa.
+	if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
+		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
+
+	return PxFilterFlag::eDEFAULT;
+}
+
+void onContactGround(PxU32 objGroup) {
+	if (objGroup & CollisionGroup::LeftFoot) {
+		printf("left foot contact ground ...\n");
+	} else if (objGroup & CollisionGroup::RightFoot) {
+		printf("right foot contact ground ...\n");
+	}
+}
+
+class CollisionCallback : public PxSimulationEventCallback {
+	void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) override {
+		PxU32 objGroup = 0;
+		for (PxU32 i = 0; i < nbPairs; i++)
+		{
+			const PxContactPair& cp = pairs[i];
+
+			if (cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND)
+			{
+				if (pairHeader.actors[0] == ar.linkMap["left_ankle"]->link ||
+					pairHeader.actors[1] == ar.linkMap["left_ankle"]->link) {
+					objGroup |= CollisionGroup::LeftFoot;
+				}
+				if (pairHeader.actors[0] == ar.linkMap["right_ankle"]->link ||
+					pairHeader.actors[1] == ar.linkMap["right_ankle"]->link) {
+					objGroup |= CollisionGroup::RightFoot;
+				}
+			}
+		}
+		if (objGroup != 0) {
+			onContactGround(objGroup);
+		}
+	}
+
+	void onConstraintBreak(PxConstraintInfo * /*constraints*/, PxU32 /*count*/) {}
+	void onWake(PxActor ** /*actors*/, PxU32 /*count*/) {}
+	void onSleep(PxActor ** /*actors*/, PxU32 /*count*/) {}
+	void onTrigger(PxTriggerPair * /*pairs*/, PxU32 /*count*/) {}
+	void onAdvance(const PxRigidBody *const * /*bodyBuffer*/, const PxTransform * /*poseBuffer*/, const PxU32 /*count*/) {}
+};
+
+CollisionCallback collisionCallback;
+
+void setupFiltering(PxRigidActor* actor, PxU32 filterGroup, PxU32 filterMask)
+{
+	PxFilterData filterData;
+	filterData.word0 = filterGroup; // word0 = own ID
+	filterData.word1 = filterMask;  // word1 = ID mask to filter pairs that trigger a
+									// contact callback;
+	const PxU32 numShapes = actor->getNbShapes();
+	PxShape** shapes = (PxShape**)malloc(sizeof(PxShape*)*numShapes);
+	actor->getShapes(shapes, numShapes);
+	for (PxU32 i = 0; i < numShapes; i++)
+	{
+		PxShape* shape = shapes[i];
+		shape->setSimulationFilterData(filterData);
+	}
+	free(shapes);
+}
+
 void initPhysics(bool /*interactive*/)
 {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
@@ -52,11 +135,12 @@ void initPhysics(bool /*interactive*/)
 	gDispatcher = PxDefaultCpuDispatcherCreate(getConfigI("C_THREADS"));
 
 	sceneDesc.cpuDispatcher	= gDispatcher;
-	sceneDesc.filterShader	= PxDefaultSimulationFilterShader;
+	sceneDesc.filterShader	= collisionShader;
 
 	sceneDesc.cudaContextManager = gCudaContextManager;
 
 	sceneDesc.solverType = PxSolverType::eTGS;
+	sceneDesc.simulationEventCallback = &collisionCallback;
 
 	if (getConfigI("S_ENABLE_GPU_DYNAMICS")) {
 		sceneDesc.flags |= PxSceneFlag::eENABLE_GPU_DYNAMICS;
@@ -69,6 +153,7 @@ void initPhysics(bool /*interactive*/)
 	}
 
 	gScene = gPhysics->createScene(sceneDesc);
+
 	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
 	if(pvdClient)
 	{
@@ -81,6 +166,7 @@ void initPhysics(bool /*interactive*/)
 
 	if (getConfigI("S_GROUND")) {
 		PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
+		setupFiltering(groundPlane, CollisionGroup::Ground, CollisionGroup::LeftFoot | CollisionGroup::RightFoot);
 		gScene->addActor(*groundPlane);
 	}
 	
