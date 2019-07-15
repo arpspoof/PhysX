@@ -110,8 +110,8 @@ void control(PxReal dt, int contactFlag) {
 
 	for (int i = 0; i < 24; i++) {
 		forces[i] = kps[i] * (targetPositions[i] - positions[i]) + kds[i] * (targetVelocities[i] - velocities[i]);
-		if (forces[i] > fls[i]) {
-			forces[i] = fls[i];
+		if (forces[i] > fls[i] ) {
+		//	forces[i] = fls[i] ;
 		}
 	}
 

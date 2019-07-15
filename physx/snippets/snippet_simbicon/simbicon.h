@@ -3,7 +3,7 @@
 constexpr int SIMBICON_RFOOT_CONTACT = 1;
 constexpr int SIMBICON_LFOOT_CONTACT = 2;
 
-constexpr float SIMBICON_TIMER = 0.2f;
+constexpr float SIMBICON_TIMER = 0.3f;
 
 void simbicon_tick(float dt, int contact);
 void simbicon_setTargets();

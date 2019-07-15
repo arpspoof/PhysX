@@ -51,9 +51,44 @@ namespace
 {
 Snippets::Camera*	sCamera;
 
+void r() {
+	Snippets::startRender(sCamera->getEye(), sCamera->getDir());
+	
+	PxScene* scene;
+	PxGetPhysics().getScenes(&scene, 1);
+	PxU32 nbActors = scene->getNbActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC);
+	if (nbActors)
+	{
+		std::vector<PxRigidActor*> actors(nbActors);
+		scene->getActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<PxActor**>(&actors[0]), nbActors);
+		Snippets::renderActors(&actors[0], static_cast<PxU32>(actors.size()), true);
+	}
+
+	PxU32 nbArticulations = scene->getNbArticulations();
+	for (PxU32 i = 0; i<nbArticulations; i++)
+	{
+		PxArticulationBase* articulation;
+		scene->getArticulations(&articulation, 1, i);
+
+		const PxU32 nbLinks = articulation->getNbLinks();
+		std::vector<PxArticulationLink*> links(nbLinks);
+		articulation->getLinks(&links[0], nbLinks);
+
+		Snippets::renderActors(reinterpret_cast<PxRigidActor**>(&links[0]), static_cast<PxU32>(links.size()), true);
+	}
+
+	Snippets::finishRender();
+}
+
 void motionCallback(int x, int y)
 {
+	static int test = 0;
 	sCamera->handleMotion(x, y);
+	if (test == 0) {
+		test = 1;
+		return;
+	}
+	r();
 }
 
 bool simulating = false;
@@ -69,6 +104,7 @@ void keyboardCallback(unsigned char key, int x, int y)
 
 	if(!sCamera->handleKey(key, x, y))
 		keyPress(key, sCamera->getTransform());
+	r();
 }
 
 void mouseCallback(int button, int state, int x, int y)
@@ -100,32 +136,7 @@ void renderCallback()
 		return;
 	}
 
-	Snippets::startRender(sCamera->getEye(), sCamera->getDir());
-
-	PxScene* scene;
-	PxGetPhysics().getScenes(&scene,1);
-	PxU32 nbActors = scene->getNbActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC);
-	if(nbActors)
-	{
-		std::vector<PxRigidActor*> actors(nbActors);
-		scene->getActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<PxActor**>(&actors[0]), nbActors);
-		Snippets::renderActors(&actors[0], static_cast<PxU32>(actors.size()), true);
-	}
-
-	PxU32 nbArticulations = scene->getNbArticulations();
-	for(PxU32 i=0;i<nbArticulations;i++)
-	{
-		PxArticulationBase* articulation;
-		scene->getArticulations(&articulation, 1, i);
-
-		const PxU32 nbLinks = articulation->getNbLinks();
-		std::vector<PxArticulationLink*> links(nbLinks);
-		articulation->getLinks(&links[0], nbLinks);
-
-		Snippets::renderActors(reinterpret_cast<PxRigidActor**>(&links[0]), static_cast<PxU32>(links.size()), true);
-	}
-
-	Snippets::finishRender();
+	r();
 
 	rendercount++;
 	if (rendercount == 60) {
@@ -144,8 +155,11 @@ void exitCallback(void)
 }
 }
 
-const PxVec3 gCamEyeLift(-8.605188f, 4.050591f, 0.145860f);
-const PxVec3 gCamDirLift(0.999581f, -0.026449f, 0.011790f);
+/*const PxVec3 gCamEyeLift(2.0f, 4.050591f, 8.605188f);
+const PxVec3 gCamDirLift(-2.0, -0, -8.605188f);*/
+
+const PxVec3 gCamEyeLift(8.0f, 4.050591f, 0);
+const PxVec3 gCamDirLift(-8.0, -0, -0);
 
 void renderLoop()
 {

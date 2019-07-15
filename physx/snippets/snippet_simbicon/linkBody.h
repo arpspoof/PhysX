@@ -54,8 +54,8 @@ public:
 	}
 	SphereLinkBody(float mass, float radius)
 		:LinkBody(mass, 
-			new physx::PxSphereGeometry(radius)),
-			/*new physx::PxBoxGeometry(radius, radius, radius)),*/
+			/*new physx::PxSphereGeometry(radius)),*/
+			new physx::PxBoxGeometry(radius, radius, radius)),
 		radius(radius) {
 	}
 };
