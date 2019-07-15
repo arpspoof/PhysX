@@ -33,8 +33,8 @@ void simbicon_tick(float dt, int contact) {
 }
 
 void simbicon_setTargets() {
-	float swingHipSwing = 0.6f;
-	float swingHipStrike = -0.1f;
+	float swingHipSwing = 0.7f;
+	float swingHipStrike = -0.2f;
 	float swingKneeSwing = -1.1f;
 	float swingKneeStrike = -0.05f;
 	float stanceKneeSwing = -0.05f;
@@ -62,11 +62,10 @@ void simbicon_setTargets() {
 
 	quat swingHipGlobal =
 		quat(swingHipSagitalGlobal, vec3(0, 0, 1)) *
-		quat(swingHipCoronalGlobal, vec3(1, 0, 0));
-	quat swingHipLocal = getBaseOri().getConjugate() * swingHipGlobal;
+		quat(swingHipCoronalGlobal, vec3(0, -1, 0));
 
-	vec3 axis(swingHipLocal.x, swingHipLocal.y, swingHipLocal.z);
-	float angle = 2 * atan2(axis.magnitude(), swingHipLocal.w);
+	vec3 axis(swingHipGlobal.x, swingHipGlobal.y, swingHipGlobal.z);
+	float angle = 2 * atan2(axis.magnitude(), swingHipGlobal.w);
 	vec3 expMap = axis.getNormalized() * angle;
 	expMap[0] = 0;
 
