@@ -33,7 +33,7 @@ void simbicon_tick(float dt, int contact) {
 }
 
 void simbicon_setTargets() {
-	float swingHipSwing = 0.8f;
+	float swingHipSwing = 0.6f;
 	float swingHipStrike = -0.1f;
 	float swingKneeSwing = -1.1f;
 	float swingKneeStrike = -0.05f;
@@ -57,30 +57,45 @@ void simbicon_setTargets() {
 	float balanceSagital = stanceFootToCenterCOM.x * cdSagital + comV.x * cvSagital;
 	float balanceCoronal = stanceFootToCenterCOM.z * cdCoronal + comV.z * cvCoronal;
 
+	float swingHipSagitalGlobal = (state & 1 ? swingHipStrike : swingHipSwing) + balanceSagital;
+	float swingHipCoronalGlobal = -balanceCoronal;
+
+	quat swingHipGlobal =
+		quat(swingHipSagitalGlobal, vec3(0, 0, 1)) *
+		quat(swingHipCoronalGlobal, vec3(1, 0, 0));
+	quat swingHipLocal = getBaseOri().getConjugate() * swingHipGlobal;
+
+	vec3 axis(swingHipLocal.x, swingHipLocal.y, swingHipLocal.z);
+	float angle = 2 * atan2(axis.magnitude(), swingHipLocal.w);
+	vec3 expMap = axis.getNormalized() * angle;
+	expMap[0] = 0;
+
+	expMap = vec3(0, -swingHipCoronalGlobal, swingHipSagitalGlobal);
+
 	switch (state) {
 	case 0:
-		setLHipTarget(vec3(0, balanceCoronal, swingHipSwing + balanceSagital));
+		setLHipTarget(expMap);
 		setLKneeTarget(swingKneeSwing);
 		setLAnkleTarget(swingAnkleSwing);
 		setRKneeTarget(stanceKneeSwing);
 		setRAnkleTarget(stanceAnkle);
 		break;
 	case 1:
-		setLHipTarget(vec3(0, balanceCoronal, swingHipStrike + balanceSagital));
+		setLHipTarget(expMap);
 		setLKneeTarget(swingKneeStrike);
 		setLAnkleTarget(swingAnkleStrike);
 		setRKneeTarget(stanceKneeStrike);
 		setRAnkleTarget(stanceAnkle);
 		break;
 	case 2:
-		setRHipTarget(vec3(0, balanceCoronal, swingHipSwing + balanceSagital));
+		setRHipTarget(expMap);
 		setRKneeTarget(swingKneeSwing);
 		setRAnkleTarget(swingAnkleSwing);
 		setLKneeTarget(stanceKneeSwing);
 		setLAnkleTarget(stanceAnkle);
 		break;
 	case 3:
-		setRHipTarget(vec3(0, balanceCoronal, swingHipStrike + balanceSagital));
+		setRHipTarget(expMap);
 		setRKneeTarget(swingKneeStrike);
 		setRAnkleTarget(swingAnkleStrike);
 		setLKneeTarget(stanceKneeStrike);
