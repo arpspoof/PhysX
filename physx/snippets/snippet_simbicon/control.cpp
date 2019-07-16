@@ -4,6 +4,9 @@
 #include "articulationTree.h"
 #include "simbicon.h"
 
+#include <fstream>
+using namespace std;
+
 PxReal twistTarget, swing1Target, swing2Target;
 
 extern Articulation ar;
@@ -76,6 +79,8 @@ std::vector<string> nameList{
 vector<float> kps, kds, fls;
 vector<float> targetPositions, targetVelocities;
 
+ofstream o("E:/test.csv");
+
 void initControl() {
 	for (string &name : nameList) {
 		PxU32 nDof = ar.linkMap[name]->link->getInboundJointDof();
@@ -93,6 +98,7 @@ void initControl() {
 		targetPositions.push_back(0);
 		targetVelocities.push_back(0);
 	}
+	o << "px, py, pz, vx, vy, vz, fx, fy, fz" << endl;
 }
 
 void control(PxReal dt, int contactFlag) {
@@ -103,6 +109,18 @@ void control(PxReal dt, int contactFlag) {
 
 	simbicon_tick(dt, contactFlag);
 	simbicon_setTargets();
+
+	/////////////////////
+	targetPositions = vector<float>(24, 0.f);
+	targetVelocities = vector<float>(24, 0.f);
+	twistTarget = 0.5f;
+	swing1Target = 1.0f;
+	swing2Target = 2.0f;
+	targetPositions[9] = twistTarget;
+	targetPositions[10] = swing1Target;
+	targetPositions[11] = swing2Target;
+
+	////////////////////
 
 	PxReal *positions = gCache->jointPosition;
 	PxReal *velocities = gCache->jointVelocity;
@@ -115,7 +133,17 @@ void control(PxReal dt, int contactFlag) {
 		}
 	}
 
-	simbicon_updateForces();
+	o << positions[9] << ", " <<
+		positions[10] << ", " <<
+		positions[11] << ", " <<
+		velocities[9] << ", " <<
+		velocities[10] << ", " <<
+		velocities[11] << ", " <<
+		forces[9] << ", " <<
+		forces[10] << ", " <<
+		forces[11] << endl;
+
+//	simbicon_updateForces();
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 }

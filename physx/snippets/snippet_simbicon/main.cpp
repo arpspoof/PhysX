@@ -183,12 +183,12 @@ void initPhysics(bool /*interactive*/)
 	gCache = gArticulation->createCache();
 	gArticulation->commonInit();
 
-/*	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
+	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 	PxReal *vp = gCache->jointPosition;
 	vp[9] = -0.5f; // +1
 	vp[10] = 0.5f; // +0.5
 	vp[11] = -0.5; // +2.5
-	gArticulation->applyCache(*gCache, PxArticulationCache::eALL);*/
+	gArticulation->applyCache(*gCache, PxArticulationCache::eALL);
 
 	initControl();
 }
