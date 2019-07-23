@@ -8,9 +8,10 @@
 *.sln.docstates
 
 compiler/
-PhysX/include/
-PhysX/install/
-physx/samples/
+include/
+install/
+samples/
+.vscode/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
