@@ -19,7 +19,7 @@ void simbicon_tick(float dt, int contact) {
 		if (state == 1 && contact & SIMBICON_LFOOT_CONTACT ||
 			state == 3 && contact & SIMBICON_RFOOT_CONTACT) {
 			state = (state + 1) % 4;
-			printf("contact detected %d, state move to %d\n", contact, state);
+		//	printf("contact detected %d, state move to %d\n", contact, state);
 		}
 	}
 	else {
@@ -27,7 +27,7 @@ void simbicon_tick(float dt, int contact) {
 		if (timer >= SIMBICON_TIMER) {
 			timer = 0;
 			state = (state + 1) % 4;
-			printf("time out, state move to %d\n", state);
+		//	printf("time out, state move to %d\n", state);
 		}
 	}
 }

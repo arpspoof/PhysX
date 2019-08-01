@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <vector>
 #include <stdio.h>
+#include <chrono>
 
 #include "PxPhysicsAPI.h"
 #include "config.h"
@@ -9,11 +10,15 @@
 #include "articulationTree.h"
 #include "simbicon.h"
 
+#include <iostream>
+
 #include "../snippetutils/SnippetUtils.h"
 #include "../snippetcommon/SnippetPrint.h"
 #include "../snippetcommon/SnippetPVD.h"
 
 using namespace physx;
+using namespace std;
+using namespace std::chrono;
 
 PxDefaultAllocator		gAllocator;
 PxDefaultErrorCallback	gErrorCallback;
@@ -70,6 +75,7 @@ void onContactGround(PxU32 objGroup) {
 class CollisionCallback : public PxSimulationEventCallback {
 	void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) override {
 		PxU32 objGroup = 0;
+    //    std::cout << "pairs " << nbPairs << std::endl;
 		for (PxU32 i = 0; i < nbPairs; i++)
 		{
 			const PxContactPair& cp = pairs[i];
@@ -91,11 +97,11 @@ class CollisionCallback : public PxSimulationEventCallback {
 		}
 	}
 
-	void onConstraintBreak(PxConstraintInfo * /*constraints*/, PxU32 /*count*/) {}
-	void onWake(PxActor ** /*actors*/, PxU32 /*count*/) {}
-	void onSleep(PxActor ** /*actors*/, PxU32 /*count*/) {}
-	void onTrigger(PxTriggerPair * /*pairs*/, PxU32 /*count*/) {}
-	void onAdvance(const PxRigidBody *const * /*bodyBuffer*/, const PxTransform * /*poseBuffer*/, const PxU32 /*count*/) {}
+	void onConstraintBreak(PxConstraintInfo * /*constraints*/, PxU32 /*count*/) override {}
+	void onWake(PxActor ** /*actors*/, PxU32 /*count*/) override {}
+	void onSleep(PxActor ** /*actors*/, PxU32 /*count*/) override {}
+	void onTrigger(PxTriggerPair * /*pairs*/, PxU32 /*count*/) override {}
+	void onAdvance(const PxRigidBody *const * /*bodyBuffer*/, const PxTransform * /*poseBuffer*/, const PxU32 /*count*/) override {}
 };
 
 CollisionCallback collisionCallback;
@@ -216,7 +222,7 @@ void cleanupPhysics(bool /*interactive*/)
 	PxCloseExtensions();  
 	gFoundation->release();
 
-	printf("SnippetArticulation done.\n");
+//	printf("SnippetArticulation done.\n");
 }
 
 void keyPress(unsigned char key, const PxTransform& camera)
@@ -234,16 +240,18 @@ int snippetMain(int argc, const char*const* argv)
 		printf("no config file specified\n");
 	}
 
-#ifdef RENDER_SNIPPET
-	extern void renderLoop();
-	renderLoop();
-#else
-	static const PxU32 frameCount = 100;
+/*	extern void renderLoop();
+	renderLoop();*/
+
+	static const PxU32 frameCount = 10000;
 	initPhysics(false);
+    auto starttime = high_resolution_clock::now();
 	for(PxU32 i=0; i<frameCount; i++)
 		stepPhysics(false);
+    auto endtime = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(endtime - starttime).count();
+    printf("%ld", duration);
 	cleanupPhysics(false);
-#endif
 
 	return 0;
 }

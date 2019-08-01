@@ -94,7 +94,7 @@ void readConfigFile(const char* path) {
 		printf("config file %s is not valid\n", path);
 		return;
 	}
-	printf("reading config file ...\n");
+//	printf("reading config file ...\n");
 
 	std::string name, type;
 	int vi;
@@ -105,12 +105,12 @@ void readConfigFile(const char* path) {
 		if (type == "int") {
 			i >> vi;
 			config[name] = _C(vi);
-			printf("CONFIG: %s is set to %d\n", name.c_str(), vi);
+//			printf("CONFIG: %s is set to %d\n", name.c_str(), vi);
 		}
 		else if (type == "float") {
 			i >> vf;
 			config[name] = _C(vf);
-			printf("CONFIG: %s is set to %f\n", name.c_str(), vf);
+//			printf("CONFIG: %s is set to %f\n", name.c_str(), vf);
 		}
 		else {
 			printf("typename %s is not valid\n", type.c_str());
@@ -121,7 +121,7 @@ void readConfigFile(const char* path) {
 	config_file_path = path;
 	i.close();
 
-	printf("reading config file done.\n");
+//	printf("reading config file done.\n");
 }
 
 void writeConfigFile() {
