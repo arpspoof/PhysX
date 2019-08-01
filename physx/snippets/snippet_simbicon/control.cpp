@@ -113,9 +113,10 @@ void control(PxReal dt, int contactFlag) {
 		if (forces[i] > fls[i] ) {
 		//	forces[i] = fls[i] ;
 		}
+        forces[i] = rand() % 100;
 	}
 
-	simbicon_updateForces();
+//	simbicon_updateForces();
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 }

@@ -55,7 +55,7 @@ PxFilterFlags collisionShader(
 
 	// trigger the contact callback for pairs (A,B) where 
 	// the filtermask of A contains the ID of B and vice versa.
-	if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
+//	if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
 		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
 
 	return PxFilterFlag::eDEFAULT;
@@ -75,7 +75,7 @@ void onContactGround(PxU32 objGroup) {
 class CollisionCallback : public PxSimulationEventCallback {
 	void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) override {
 		PxU32 objGroup = 0;
-    //    std::cout << "pairs " << nbPairs << std::endl;
+        std::cout << "pairs " << nbPairs << std::endl;
 		for (PxU32 i = 0; i < nbPairs; i++)
 		{
 			const PxContactPair& cp = pairs[i];
@@ -85,10 +85,12 @@ class CollisionCallback : public PxSimulationEventCallback {
 				if (pairHeader.actors[0] == ar.linkMap["left_ankle"]->link ||
 					pairHeader.actors[1] == ar.linkMap["left_ankle"]->link) {
 					objGroup |= CollisionGroup::LeftFoot;
+                    std::cout << "left foot " << std::endl;
 				}
 				if (pairHeader.actors[0] == ar.linkMap["right_ankle"]->link ||
 					pairHeader.actors[1] == ar.linkMap["right_ankle"]->link) {
 					objGroup |= CollisionGroup::RightFoot;
+                    std::cout << "right foot " << std::endl;
 				}
 			}
 		}
@@ -240,18 +242,18 @@ int snippetMain(int argc, const char*const* argv)
 		printf("no config file specified\n");
 	}
 
-/*	extern void renderLoop();
-	renderLoop();*/
+	extern void renderLoop();
+	renderLoop();
 
-	static const PxU32 frameCount = 10000;
+/*	static const PxU32 frameCount = 10000;
 	initPhysics(false);
     auto starttime = high_resolution_clock::now();
 	for(PxU32 i=0; i<frameCount; i++)
 		stepPhysics(false);
     auto endtime = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(endtime - starttime).count();
-    printf("%ld", duration);
-	cleanupPhysics(false);
+    printf("%ld\n", duration);
+	cleanupPhysics(false);*/
 
 	return 0;
 }
