@@ -1,5 +1,9 @@
 # NVIDIA PhysX SDK 4.1
 
+ARCH:
+physx/buildtools/presets/public/linux.xml
+<cmakeParam name="CMAKE_LIBRARY_ARCHITECTURE" value="x86_64-linux-gnu" comment="library architecture" />
+
 Copyright (c) 2019 NVIDIA Corporation. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
