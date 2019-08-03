@@ -53,3 +53,6 @@ S_GROUND	int	1
 T_BASE_HEIGHT	float	4.5500000
 T_KD	float	100.099998
 T_KP	float	500.000000
+T_t	float	1
+T_a	float	1
+T_b	float	0

@@ -116,16 +116,16 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 
 	simbicon_updateForces();*/
 
-	float a = 1, b = 1;
+	float t = getConfigF("T_t"), a = getConfigF("T_a"), b = getConfigF("T_b");
 
 	PxReal *forces = gCache->jointForce;
-	PxVec3 testF(0, a, b);
+	PxVec3 testF(t, a, b);
 	testF.normalize();
 	forces[0] = testF.x * 200;
 	forces[1] = testF.y * 200;
 	forces[2] = testF.z * 200;
 
-	PxVec3 v = ar.linkMap["chest"]->link->getAngularVelocity();
+/*	PxVec3 v = ar.linkMap["chest"]->link->getAngularVelocity();
 	PxQuat qNeck = ar.linkMap["chest"]->link->getGlobalPose().q;
 	PxQuat qChest = ar.linkMap["root"]->link->getGlobalPose().q;
 	PxQuat qLocal = qChest.getConjugate() * qNeck;
@@ -133,7 +133,12 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 	PxVec3 testV(0, -b, a);
 	testV.normalize();
 	testV = qLocal.rotate(testV);
-	printf("dot: %f\n", testV.dot(testF));
+	printf("dot: %f\n", testV.dot(testF));*/
+
+	PxReal *velocities = gCache->jointVelocity;
+	PxReal *acc = gCache->jointAcceleration;
+
+	printf("a = %f,%f,%f; v = %f,%f,%f\n", acc[0], acc[1], acc[2], velocities[0], velocities[1], velocities[2]);
 
 	//v = qNeck.getConjugate().rotate(v);
 	//printf("v = %f, %f, %f; q = %f, %f, %f, %f\n", v[0], v[1], v[2], qLocal.w, qLocal.x, qLocal.y, qLocal.z);
