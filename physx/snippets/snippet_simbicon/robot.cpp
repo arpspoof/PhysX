@@ -13,7 +13,7 @@ extern Articulation ar;
 
 // Link bodies
 NULLLinkBody bodyBase;
-SphereLinkBody bodyRoot(6.f, 0.36f);
+SphereLinkBody bodyRoot(6.f, 0.1f);
 SphereLinkBody bodyChest(14.f, 0.48f);
 SphereLinkBody bodyNeck(2.f, 0.41f);
 CapsuleLinkBody bodyHip(4.5f, 0.22f, 1.2f);
@@ -55,7 +55,7 @@ RevoluteDescriptionNode descrRAnkle("right_ankle", "right_ankle", &bodyAnkle, Px
 	PxVec3(0.18f, -0.09f, 0), PxVec3(0, -1.63948f, 0));
 RevoluteDescriptionNode descrLAnkle("left_ankle", "left_ankle", &bodyAnkle, PxArticulationAxis::eSWING2,
 	PxVec3(0.18f, -0.09f, 0), PxVec3(0, -1.63948f, 0));
-
+/*
 void loadRoot() {
 	ArticulationTree arTree;
 
@@ -113,4 +113,20 @@ void loadRoot() {
 	auto leftFoot = ar.linkMap["left_ankle"]->link;
 	setupFiltering(rightFoot, CollisionGroup::RightFoot, CollisionGroup::Ground);
 	setupFiltering(leftFoot, CollisionGroup::LeftFoot, CollisionGroup::Ground);
+
+	gArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, true);
+}*/
+
+void loadRoot() {
+	ArticulationTree arTree;
+
+	arTree.addFixedDescriptionNode(descrRoot);
+	arTree.setRoot("root");
+
+	arTree.addSpericalDescriptionNode(descrChest);
+	arTree.connect("root", "chest");
+
+	arTree.buildArticulation(ar);
+
+	gArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, true);
 }

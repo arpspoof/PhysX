@@ -69,8 +69,7 @@ PxVec3 getPos(PxQuat q) {
 }
 
 std::vector<string> nameList{
-	"chest", "right_hip", "left_hip", "neck", "right_shoulder", "left_shoulder",
-	"right_knee", "left_knee", "right_elbow", "left_elbow", "right_ankle", "left_ankle"
+	"chest",
 };
 
 vector<float> kps, kds, fls;
@@ -88,23 +87,23 @@ void initControl() {
 			fls.push_back(fl);
 		}
 	}
-	assert(kps.size() == 24);
+//	assert(kps.size() == 24);
 	for (int i = 0; i < 24; i++) {
 		targetPositions.push_back(0);
 		targetVelocities.push_back(0);
 	}
 }
 
-void control(PxReal dt, int contactFlag) {
+void control(PxReal /*dt*/, int /*contactFlag*/) {
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
 	targetPositions = vector<float>(24, 0.f);
 	targetVelocities = vector<float>(24, 0.f);
 
-	simbicon_tick(dt, contactFlag);
-	simbicon_setTargets();
+//	simbicon_tick(dt, contactFlag);
+//	simbicon_setTargets();
 
-	PxReal *positions = gCache->jointPosition;
+/*	PxReal *positions = gCache->jointPosition;
 	PxReal *velocities = gCache->jointVelocity;
 	PxReal *forces = gCache->jointForce;
 
@@ -115,7 +114,29 @@ void control(PxReal dt, int contactFlag) {
 		}
 	}
 
-	simbicon_updateForces();
+	simbicon_updateForces();*/
+
+	float a = 1, b = 1;
+
+	PxReal *forces = gCache->jointForce;
+	PxVec3 testF(0, a, b);
+	testF.normalize();
+	forces[0] = testF.x * 200;
+	forces[1] = testF.y * 200;
+	forces[2] = testF.z * 200;
+
+	PxVec3 v = ar.linkMap["chest"]->link->getAngularVelocity();
+	PxQuat qNeck = ar.linkMap["chest"]->link->getGlobalPose().q;
+	PxQuat qChest = ar.linkMap["root"]->link->getGlobalPose().q;
+	PxQuat qLocal = qChest.getConjugate() * qNeck;
+
+	PxVec3 testV(0, -b, a);
+	testV.normalize();
+	testV = qLocal.rotate(testV);
+	printf("dot: %f\n", testV.dot(testF));
+
+	//v = qNeck.getConjugate().rotate(v);
+	//printf("v = %f, %f, %f; q = %f, %f, %f, %f\n", v[0], v[1], v[2], qLocal.w, qLocal.x, qLocal.y, qLocal.z);
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 }
