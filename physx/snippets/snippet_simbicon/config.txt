@@ -3,7 +3,7 @@ C_GRAVITY	float	0.0000
 C_RENDER_FREQUENCY	float	60.000000
 C_STATIC_FRICTION	float	1.000000
 C_THREADS	int	0
-C_TIME_STEP	float	0.0001000
+C_TIME_STEP	float	0.001000
 C_TWIST_LIMIT	float	0.700000
 P_FL_chest	float	200.000000
 P_FL_left_ankle	float	100.000000
@@ -53,6 +53,6 @@ S_GROUND	int	1
 T_BASE_HEIGHT	float	4.5500000
 T_KD	float	100.099998
 T_KP	float	500.000000
-T_t	float	1
-T_a	float	1
-T_b	float	0
+T_t	float	2
+T_a	float	3
+T_b	float	1

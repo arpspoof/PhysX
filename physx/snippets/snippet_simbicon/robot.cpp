@@ -14,7 +14,7 @@ extern Articulation ar;
 // Link bodies
 NULLLinkBody bodyBase;
 SphereLinkBody bodyRoot(6.f, 0.1f);
-SphereLinkBody bodyChest(14.f, 0.48f);
+SphereLinkBody bodyChest(14.f, 2.8f); // 0.48
 SphereLinkBody bodyNeck(2.f, 0.41f);
 CapsuleLinkBody bodyHip(4.5f, 0.22f, 1.2f);
 CapsuleLinkBody bodyKnee(3.f, 0.2f, 1.24f);
@@ -26,9 +26,9 @@ BoxLinkBody bodyAnkle(1.0f, 0.22f, 0.708f, 0.36f); // note: switch x and y
 // Descriptions
 NULLDescriptionNode descrBase("base", &bodyBase);
 FixedDescriptionNode descrRoot("root", "root", &bodyRoot, 
-	PxVec3(0, 0.28f, 0), PxVec3(0, 0, 0));
+	PxVec3(0, 0, 0), PxVec3(0, 0, 0));
 SpericalDescriptionNode descrChest("chest", "chest", &bodyChest, 
-	PxVec3(0, 0.48f, 0), PxVec3(0, 0.944604f, 0));
+	PxVec3(0, 0, 0), PxVec3(0, 0, 0));
 SpericalDescriptionNode descrNeck("neck", "neck", &bodyNeck, 
 	PxVec3(0, 0.7f, 0), PxVec3(0, 0.895576f, 0));
 SpericalDescriptionNode descrRHip("right_hip", "right_hip", &bodyHip, 

@@ -28,12 +28,12 @@ void FixedJoint::enableDrive(std::string name) {
 SphericalJoint::SphericalJoint(Link *link, PxTransform parentPose, PxTransform childPose)
 	: Joint(link, parentPose, childPose) {
 	joint->setJointType(PxArticulationJointType::eSPHERICAL);
-	joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eLIMITED);
+	joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eFREE);
 	joint->setMotion(PxArticulationAxis::eSWING1, PxArticulationMotion::eFREE);
 	joint->setMotion(PxArticulationAxis::eSWING2, PxArticulationMotion::eFREE);
 
-	PxReal twistLimit = getConfigF("C_TWIST_LIMIT");
-	joint->setLimit(PxArticulationAxis::eTWIST, -twistLimit, twistLimit);
+/*	PxReal twistLimit = getConfigF("C_TWIST_LIMIT");
+	joint->setLimit(PxArticulationAxis::eTWIST, -twistLimit, twistLimit);*/
 }
 
 void SphericalJoint::enableDrive(std::string name) {

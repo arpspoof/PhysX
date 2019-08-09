@@ -94,6 +94,8 @@ void initControl() {
 	}
 }
 
+int counter = 0;
+
 void control(PxReal /*dt*/, int /*contactFlag*/) {
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
@@ -116,29 +118,44 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 
 	simbicon_updateForces();*/
 
+	counter++;
+
 	float t = getConfigF("T_t"), a = getConfigF("T_a"), b = getConfigF("T_b");
 
 	PxReal *forces = gCache->jointForce;
 	PxVec3 testF(t, a, b);
 	testF.normalize();
-	forces[0] = testF.x * 200;
-	forces[1] = testF.y * 200;
-	forces[2] = testF.z * 200;
 
-/*	PxVec3 v = ar.linkMap["chest"]->link->getAngularVelocity();
+	PxVec3 v = ar.linkMap["chest"]->link->getAngularVelocity();
 	PxQuat qNeck = ar.linkMap["chest"]->link->getGlobalPose().q;
 	PxQuat qChest = ar.linkMap["root"]->link->getGlobalPose().q;
 	PxQuat qLocal = qChest.getConjugate() * qNeck;
 
-	PxVec3 testV(0, -b, a);
-	testV.normalize();
-	testV = qLocal.rotate(testV);
-	printf("dot: %f\n", testV.dot(testF));*/
+	testF = qLocal.getConjugate().rotate(testF);
+
+	if (1 || counter <= 500) {
+		forces[0] = testF.x * 4;
+		forces[1] = testF.y * 4;
+		forces[2] = testF.z * 4;
+	}
+	else {
+		forces[0] = 0;
+		forces[1] = 0;
+		forces[2] = 0;
+	}
 
 	PxReal *velocities = gCache->jointVelocity;
 	PxReal *acc = gCache->jointAcceleration;
 
-	printf("a = %f,%f,%f; v = %f,%f,%f\n", acc[0], acc[1], acc[2], velocities[0], velocities[1], velocities[2]);
+
+	PxReal *p = gCache->jointPosition;
+
+	PxVec3 vlo(velocities[0], velocities[1], velocities[2]);
+
+	vlo = qLocal.rotate(vlo);
+
+	printf("a0 = %f,%f,%f; v1 = %f,%f,%f; p = %f,%f,%f\n", 
+		acc[0], acc[1], acc[2], vlo[0], vlo[1], vlo[2], p[0], p[1], p[2]);
 
 	//v = qNeck.getConjugate().rotate(v);
 	//printf("v = %f, %f, %f; q = %f, %f, %f, %f\n", v[0], v[1], v[2], qLocal.w, qLocal.x, qLocal.y, qLocal.z);
