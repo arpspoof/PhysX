@@ -11,6 +11,8 @@
 #include "simbicon.h"
 
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 #include "../snippetutils/SnippetUtils.h"
 #include "../snippetcommon/SnippetPrint.h"
@@ -123,6 +125,27 @@ void setupFiltering(PxRigidActor* actor, PxU32 filterGroup, PxU32 filterMask)
 	free(shapes);
 }
 
+void assignIndices() {
+	typedef pair<PxU32, Link*> PIDL;
+	vector<PIDL> linkIndices;
+	for (auto &kvp : ar.linkMap) {
+		linkIndices.push_back(make_pair(kvp.second->link->getLinkIndex(), kvp.second));
+	}
+	sort(linkIndices.begin(), linkIndices.end(), [=](PIDL a, PIDL b) { return a.first < b.first; });
+
+	int currentIndex = 0;
+	for (PIDL &p : linkIndices) {
+		int nDof = (int)p.second->link->getInboundJointDof();
+		if (!p.second->inboundJoint) {
+			continue;
+		}
+		p.second->inboundJoint->nDof = nDof;
+		p.second->inboundJoint->cacheIndex = currentIndex;
+		currentIndex += nDof;
+		printf("link id = %d, dof = %d, index = %d\n", p.first, nDof, p.second->inboundJoint->cacheIndex);
+	}
+}
+
 void initPhysics(bool /*interactive*/)
 {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
@@ -195,6 +218,7 @@ void initPhysics(bool /*interactive*/)
 	vp[10] = 0.5f; // +0.5
 	vp[11] = -0.5; // +2.5
 	gArticulation->applyCache(*gCache, PxArticulationCache::eALL);*/
+	assignIndices();
 
 	initControl();
 }
@@ -240,18 +264,18 @@ int snippetMain(int argc, const char*const* argv)
 		printf("no config file specified\n");
 	}
 
-/*	extern void renderLoop();
-	renderLoop();*/
+	extern void renderLoop();
+	renderLoop();
 
-	static const PxU32 frameCount = 10000;
+/*	static const PxU32 frameCount = 10000;
 	initPhysics(false);
     auto starttime = high_resolution_clock::now();
 	for(PxU32 i=0; i<frameCount; i++)
 		stepPhysics(false);
     auto endtime = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(endtime - starttime).count();
-    printf("%ld", duration);
-	cleanupPhysics(false);
+    printf("%lld", duration);
+	cleanupPhysics(false);*/
 
 	return 0;
 }

@@ -11,7 +11,8 @@ static PxTransform getJointPose(PxVec3 offset) {
 	return PxTransform(rtzinv.rotate(offset));
 }
 
-Joint::Joint(Link *link, PxTransform parentPose, PxTransform childPose) {
+Joint::Joint(Link *link, PxTransform parentPose, PxTransform childPose)
+	: nDof(-1), cacheIndex(-1) {
 	joint = static_cast<PxArticulationJointReducedCoordinate*>(link->link->getInboundJoint());
 	joint->setParentPose(parentPose);
 	joint->setChildPose(childPose);
@@ -61,7 +62,8 @@ void RevoluteJoint::enableDrive(std::string name) {
 	joint->setDrive(axis, kp, kd, fl);
 }
 
-Link::Link(Link *parent, PxTransform transform, LinkBody *body) :parentLink(parent) {
+Link::Link(Link *parent, PxTransform transform, LinkBody *body)
+	:parentLink(parent), inboundJoint(nullptr) {
 	link = gArticulation->createLink(parent ? parent->link : NULL, transform);
 	if (body->hasGeometry) {
 		PxRigidActorExt::createExclusiveShape(*link, body->getGeometry(), *gMaterial);

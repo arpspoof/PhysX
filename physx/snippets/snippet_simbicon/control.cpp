@@ -49,7 +49,8 @@ left_ankle		23
 
 PxQuat getQuat(PxReal t, PxReal s1, PxReal s2) {
 	PxVec3 s(0, s1, s2);
-	return PxQuat(s.magnitude(), s.getNormalized()) * PxQuat(t, PxVec3(1, 0, 0));
+	PxQuat swingQuat = s.isZero() ? PxQuat(0, 0, 0, 1) : PxQuat(s.magnitude(), s.getNormalized());
+	return swingQuat * PxQuat(t, PxVec3(1, 0, 0));
 }
 PxQuat getQuat(PxVec3 v) {
 	return getQuat(v[0], v[1], v[2]);
@@ -95,6 +96,10 @@ void initControl() {
 	}
 }
 
+PxQuat getPositionDifference(PxVec3 after, PxVec3 before) {
+	return getQuat(after) * getQuat(before).getConjugate();
+}
+
 void control(PxReal dt, int contactFlag) {
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
@@ -108,10 +113,83 @@ void control(PxReal dt, int contactFlag) {
 	PxReal *velocities = gCache->jointVelocity;
 	PxReal *forces = gCache->jointForce;
 
-	for (int i = 0; i < 24; i++) {
+	memset(forces, 0, sizeof(PxReal) * gArticulation->getDofs());
+
+/*	for (int i = 0; i < 24; i++) {
 		forces[i] = kps[i] * (targetPositions[i] - positions[i]) + kds[i] * (targetVelocities[i] - velocities[i]);
 		if (forces[i] > fls[i] ) {
 		//	forces[i] = fls[i] ;
+		}
+	}*/
+
+	for (auto &kvp : ar.jointMap) {
+		auto &joint = kvp.second;
+
+		int nDof = joint->nDof;
+		int cacheIndex = joint->cacheIndex;
+
+		if (nDof == 0) continue;
+
+		if (nDof == 3) {
+			PxVec3 position(
+				positions[cacheIndex],
+				positions[cacheIndex + 1], 
+				positions[cacheIndex + 2]
+			);
+			PxVec3 velocity(
+				velocities[cacheIndex],
+				velocities[cacheIndex + 1],
+				velocities[cacheIndex + 2]
+			);
+			PxVec3 targetPosition(
+				targetPositions[cacheIndex],
+				targetPositions[cacheIndex + 1],
+				targetPositions[cacheIndex + 2]
+			);
+			PxVec3 targetVelocity(
+				targetVelocities[cacheIndex],
+				targetVelocities[cacheIndex + 1],
+				targetVelocities[cacheIndex + 2]
+			);
+			PxVec3 kp(
+				kps[cacheIndex],
+				kps[cacheIndex + 1],
+				kps[cacheIndex + 2]
+			);
+			PxVec3 kd(
+				kds[cacheIndex],
+				kds[cacheIndex + 1],
+				kds[cacheIndex + 2]
+			);
+
+			PxQuat localRotation = getQuat(position);
+			PxVec3 velocityInParentFrame = localRotation.rotate(velocity);
+
+			PxQuat posDifference = getPositionDifference(targetPosition, position);
+			PxVec3 axis;
+			PxReal angle;
+			posDifference.toRadiansAndUnitAxis(angle, axis);
+
+			PxVec3 forceInParentFrame =
+				PxMat33::createDiagonal(kp) * axis * angle -
+				PxMat33::createDiagonal(kd) * velocityInParentFrame;
+			PxVec3 forceInChildFrame = localRotation.getConjugate().rotate(forceInParentFrame);
+
+			forces[cacheIndex] = forceInChildFrame[0];
+			forces[cacheIndex + 1] = forceInChildFrame[1];
+			forces[cacheIndex + 2] = forceInChildFrame[2];
+		}
+		else if (nDof == 1) {
+			PxReal position = positions[cacheIndex];
+			PxReal velocity = velocities[cacheIndex];
+			PxReal targetPosition = targetPositions[cacheIndex];
+			PxReal kp = kps[cacheIndex];
+			PxReal kd = kds[cacheIndex];
+			forces[cacheIndex] = kp * (targetPosition - position) - kd * velocity;
+		}
+		else {
+			printf("no controller defined for Dof %d\n", nDof);
+			assert(false);
 		}
 	}
 
