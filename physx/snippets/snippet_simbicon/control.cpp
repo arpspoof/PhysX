@@ -56,10 +56,6 @@ PxQuat getQuat(PxVec3 v) {
 	return getQuat(v[0], v[1], v[2]);
 }
 
-PxQuat getRelQuat(PxQuat from, PxQuat to) {
-	return to * from.getConjugate();
-}
-
 PxVec3 getPos(PxQuat q) {
 	PxQuat qT = PxQuat(q.x, 0, 0, q.w).getNormalized();
 	PxQuat qS = q * qT.getConjugate();

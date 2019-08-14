@@ -95,6 +95,27 @@ vec3 getRHipForce() {
 	return vec3(forces[3], forces[4], forces[5]);
 }
 
+static PxQuat getQuat(PxReal t, PxReal s1, PxReal s2) {
+	PxVec3 s(0, s1, s2);
+	PxQuat swingQuat = s.isZero() ? PxQuat(0, 0, 0, 1) : PxQuat(s.magnitude(), s.getNormalized());
+	return swingQuat * PxQuat(t, PxVec3(1, 0, 0));
+}
+
+quat getChestOriLocal() {
+	PxReal *positions = gCache->jointPosition;
+	return getQuat(positions[0], positions[1], positions[2]);
+}
+
+quat getLHipOriLocal() {
+	PxReal *positions = gCache->jointPosition;
+	return getQuat(positions[6], positions[7], positions[8]);
+}
+
+quat getRHipOriLocal() {
+	PxReal *positions = gCache->jointPosition;
+	return getQuat(positions[3], positions[4], positions[5]);
+}
+
 void setLHipForce(vec3 f) {
 	PxReal *forces = gCache->jointForce;
 	forces[6] = f[0];

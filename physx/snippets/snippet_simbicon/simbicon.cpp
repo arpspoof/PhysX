@@ -103,7 +103,7 @@ void simbicon_setTargets() {
 	}
 }
 
-void simbicon_updateForces() {
+/*void simbicon_updateForces() {
 	quat rootOri = getQuat(SBC_PI / 2, vec3(0, 0, 1)) * getBaseOri().getConjugate();
 	vec3 rootAngularV = getBaseAngularVelocity();
 
@@ -126,5 +126,41 @@ void simbicon_updateForces() {
 	}
 	else {
 		setLHipForce(stanceHipForce);
+	}
+}*/
+
+void simbicon_updateForces() {
+	quat rootOri = getBaseOri();
+	vec3 rootAngularV = getBaseAngularVelocity();
+
+	float kp = getConfigF("P_KP_root");
+	float kd = getConfigF("P_KD_root");
+
+	quat rtz(0, 0, 0.7071068f, 0.7071068f);
+	quat targetDifference = rtz * rootOri.getConjugate();
+
+	vec3 targetDiffAxis;
+	float targetDiffAngle;
+	targetDifference.toRadiansAndUnitAxis(targetDiffAngle, targetDiffAxis);
+
+	vec3 rootForceGlobal = targetDiffAngle * kp * targetDiffAxis - kd * rootAngularV;
+	vec3 rootForceInRootFrame = rootOri.getConjugate().rotate(rootForceGlobal);
+
+	vec3 chestForceInRootFrame = getChestOriLocal().rotate(getChestForce());
+
+	quat swingHipOriLocal = state < 2 ? getLHipOriLocal() : getRHipOriLocal();
+	vec3 swingHipForceInRootFrame = swingHipOriLocal.rotate(state < 2 ? getLHipForce() : getRHipForce());
+
+	vec3 stanceHipForceInRootFrame = 
+		-(rootForceInRootFrame + chestForceInRootFrame + swingHipForceInRootFrame);
+
+	quat stanceHipOriLocal = state < 2 ? getRHipOriLocal() : getLHipOriLocal();
+	vec3 stanceHipForceInLocalFrame = stanceHipOriLocal.getConjugate().rotate(stanceHipForceInRootFrame);
+
+	if (state < 2) {
+		setRHipForce(stanceHipForceInLocalFrame);
+	}
+	else {
+		setLHipForce(stanceHipForceInLocalFrame);
 	}
 }

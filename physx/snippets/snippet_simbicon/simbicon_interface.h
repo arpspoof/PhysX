@@ -34,6 +34,10 @@ vec3 getChestForce();
 vec3 getLHipForce();
 vec3 getRHipForce();
 
+quat getChestOriLocal();
+quat getLHipOriLocal();
+quat getRHipOriLocal();
+
 void setLHipForce(vec3 f);
 void setRHipForce(vec3 f);
 
