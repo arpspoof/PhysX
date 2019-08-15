@@ -33,7 +33,7 @@ void simbicon_tick(float dt, int contact) {
 }
 
 void simbicon_setTargets() {
-	float swingHipSwing = 0.7f;
+	float swingHipSwing = 0.75f;
 	float swingHipStrike = -0.2f;
 	float swingKneeSwing = -1.1f;
 	float swingKneeStrike = -0.05f;
@@ -43,7 +43,7 @@ void simbicon_setTargets() {
 	float swingAnkleStrike = 0.05f;
 	float stanceAnkle = 0.0f;
 
-	setChestTarget(vec3(0, 0, -0.1f));
+	setChestTarget(vec3(0, 0, -0.2f));
 
 	vec3 stanceFootCOM = state < 2 ? getRFootCOMGlobalPos() : getLFootCOMGlobalPos();
 	vec3 stanceFootToCenterCOM = getCOMGlobalPos() - stanceFootCOM;
@@ -143,7 +143,7 @@ void simbicon_updateForces() {
 	float targetDiffAngle;
 	targetDifference.toRadiansAndUnitAxis(targetDiffAngle, targetDiffAxis);
 
-	vec3 rootForceGlobal = targetDiffAngle * kp * targetDiffAxis - kd * rootAngularV;
+	vec3 rootForceGlobal = targetDiffAngle * kp * targetDiffAxis - kd * rtz.getConjugate().rotate(rootAngularV);
 	vec3 rootForceInRootFrame = rootOri.getConjugate().rotate(rootForceGlobal);
 
 	vec3 chestForceInRootFrame = getChestOriLocal().rotate(getChestForce());

@@ -43,10 +43,10 @@ P_KP_right_hip	float	500.000000
 P_KP_right_knee	float	500.000000
 P_KP_right_shoulder	float	200.000000
 P_KP_root	float	2000.000000
-P_CD_SAGITAL	float	0.2
-P_CV_SAGITAL	float	0.4
-P_CD_CORONAL	float	0.18
-P_CV_CORONAL	float	0.3
+P_CD_SAGITAL	float	0.3
+P_CV_SAGITAL	float	0.15
+P_CD_CORONAL	float	0.25
+P_CV_CORONAL	float	0.1
 S_ENABLE_GPU_BROADPHASE	int	0
 S_ENABLE_GPU_DYNAMICS	int	0
 S_GROUND	int	1
