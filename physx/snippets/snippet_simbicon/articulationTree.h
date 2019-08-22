@@ -15,7 +15,7 @@ public:
 	Link *childLink;
 	int nDof;
 	int cacheIndex;
-	physx::PxArticulationJointReducedCoordinate *joint;
+	physx::PxArticulationJoint *joint;
 	physx::PxVec3 globalPositionOffset;
 	virtual void enableDrive(std::string name) = 0;
 protected:

@@ -83,16 +83,19 @@ vec3 getLinearVelocity() {
 }
 
 vec3 getChestForce() {
-	PxReal *forces = gCache->jointForce;
-	return vec3(forces[0], forces[1], forces[2]);
+    return vec3(0, 0, 0);
+	//PxReal *forces = gCache->jointForce;
+	//return vec3(forces[0], forces[1], forces[2]);
 }
 vec3 getLHipForce() {
-	PxReal *forces = gCache->jointForce;
-	return vec3(forces[6], forces[7], forces[8]);
+    return vec3(0, 0, 0);
+	//PxReal *forces = gCache->jointForce;
+	//return vec3(forces[6], forces[7], forces[8]);
 }
 vec3 getRHipForce() {
-	PxReal *forces = gCache->jointForce;
-	return vec3(forces[3], forces[4], forces[5]);
+    return vec3(0, 0, 0);
+	//PxReal *forces = gCache->jointForce;
+	//return vec3(forces[3], forces[4], forces[5]);
 }
 
 static PxQuat getQuat(PxReal t, PxReal s1, PxReal s2) {
@@ -102,31 +105,36 @@ static PxQuat getQuat(PxReal t, PxReal s1, PxReal s2) {
 }
 
 quat getChestOriLocal() {
-	PxReal *positions = gCache->jointPosition;
-	return getQuat(positions[0], positions[1], positions[2]);
+    return PxQuat(0, 0, 0, 1);
+	//PxReal *positions = gCache->jointPosition;
+	//return getQuat(positions[0], positions[1], positions[2]);
 }
 
 quat getLHipOriLocal() {
-	PxReal *positions = gCache->jointPosition;
-	return getQuat(positions[6], positions[7], positions[8]);
+    return PxQuat(0, 0, 0, 1);
+	//PxReal *positions = gCache->jointPosition;
+	//return getQuat(positions[6], positions[7], positions[8]);
 }
 
 quat getRHipOriLocal() {
-	PxReal *positions = gCache->jointPosition;
-	return getQuat(positions[3], positions[4], positions[5]);
+    return PxQuat(0, 0, 0, 1);
+	//PxReal *positions = gCache->jointPosition;
+	//return getQuat(positions[3], positions[4], positions[5]);
 }
 
 void setLHipForce(vec3 f) {
-	PxReal *forces = gCache->jointForce;
-	forces[6] = f[0];
-	forces[7] = f[1];
-	forces[8] = f[2];
+    return;
+	////PxReal *forces = gCache->jointForce;
+	//forces[6] = f[0];
+	//forces[7] = f[1];
+	//forces[8] = f[2];
 }
 void setRHipForce(vec3 f) {
-	PxReal *forces = gCache->jointForce;
-	forces[3] = f[0];
-	forces[4] = f[1];
-	forces[5] = f[2];
+    return;
+	//PxReal *forces = gCache->jointForce;
+	//forces[3] = f[0];
+	//forces[4] = f[1];
+	//forces[5] = f[2];
 }
 
 quat getQuat(float angle, vec3 axis) {

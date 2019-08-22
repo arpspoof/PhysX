@@ -35,9 +35,9 @@ PxMaterial*				gMaterial		= NULL;
 
 PxPvd*                  gPvd			= NULL;
 
-PxArticulationReducedCoordinate*		gArticulation = NULL;
-PxArticulationCache*					gCache = NULL;
-PxArticulationJointReducedCoordinate*	gDriveJoint = NULL;
+PxArticulation*		gArticulation = NULL;
+//PxArticulationCache*					gCache = NULL;
+//PxArticulationJointReducedCoordinate*	gDriveJoint = NULL;
 
 Articulation ar;
 
@@ -203,14 +203,14 @@ void initPhysics(bool /*interactive*/)
 		gScene->addActor(*groundPlane);
 	}
 	
-	gArticulation = gPhysics->createArticulationReducedCoordinate();
+	gArticulation = gPhysics->createArticulation();
 
 	loader();
 
 	gScene->addArticulation(*gArticulation);
 
-	gCache = gArticulation->createCache();
-	gArticulation->commonInit();
+//	gCache = gArticulation->createCache();
+//	gArticulation->commonInit();
 
 /*	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 	PxReal *vp = gCache->jointPosition;

@@ -8,7 +8,7 @@ PxReal twistTarget, swing1Target, swing2Target;
 
 extern Articulation ar;
 
-void driveSpherical(Joint *j) {
+/*void driveSpherical(Joint *j) {
 	j->joint->setDriveTarget(PxArticulationAxis::eTWIST, twistTarget);
 	j->joint->setDriveTarget(PxArticulationAxis::eSWING1, swing1Target);
 	j->joint->setDriveTarget(PxArticulationAxis::eSWING2, swing2Target);
@@ -26,7 +26,7 @@ void driveRevolute(Joint *j) {
 		target = swing2Target; break;
 	}
 	rev->joint->setDriveTarget(rev->axis, target);
-}
+}*/
 
 /*
 
@@ -97,7 +97,7 @@ PxQuat getPositionDifference(PxVec3 after, PxVec3 before) {
 }
 
 void control(PxReal dt, int contactFlag) {
-	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
+/*	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
 	targetPositions = vector<float>(24, 0.f);
 	targetVelocities = vector<float>(24, 0.f);
@@ -116,7 +116,12 @@ void control(PxReal dt, int contactFlag) {
 		if (forces[i] > fls[i] ) {
 		//	forces[i] = fls[i] ;
 		}
-	}
+	}*/
+
+    for (auto &kvp : ar.jointMap) {
+        auto &joint = kvp.second;
+        joint->joint->setTargetOrientation(PxQuat(0, 0, 0, 1));
+    }
 
 /*	for (auto &kvp : ar.jointMap) {
 		auto &joint = kvp.second;
@@ -191,5 +196,5 @@ void control(PxReal dt, int contactFlag) {
 
 	simbicon_updateForces();*/
 
-	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
+//	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 }

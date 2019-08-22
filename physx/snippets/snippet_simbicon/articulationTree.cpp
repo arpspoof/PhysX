@@ -13,14 +13,16 @@ static PxTransform getJointPose(PxVec3 offset) {
 
 Joint::Joint(Link *link, PxTransform parentPose, PxTransform childPose)
 	: nDof(-1), cacheIndex(-1) {
-	joint = static_cast<PxArticulationJointReducedCoordinate*>(link->link->getInboundJoint());
+	joint = static_cast<PxArticulationJoint*>(link->link->getInboundJoint());
 	joint->setParentPose(parentPose);
 	joint->setChildPose(childPose);
+    joint->setDriveType(PxArticulationJointDriveType::Enum::eTARGET);
+    joint->setStiffness(1000);
+    joint->setDamping(200);
 }
 
 FixedJoint::FixedJoint(Link *link, PxTransform parentPose, PxTransform childPose)
 	: Joint(link, parentPose, childPose) {
-	joint->setJointType(PxArticulationJointType::eFIX);
 }
 
 void FixedJoint::enableDrive(std::string name) {
@@ -28,38 +30,17 @@ void FixedJoint::enableDrive(std::string name) {
 
 SphericalJoint::SphericalJoint(Link *link, PxTransform parentPose, PxTransform childPose)
 	: Joint(link, parentPose, childPose) {
-	joint->setJointType(PxArticulationJointType::eSPHERICAL);
-	joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eLIMITED);
-	joint->setMotion(PxArticulationAxis::eSWING1, PxArticulationMotion::eFREE);
-	joint->setMotion(PxArticulationAxis::eSWING2, PxArticulationMotion::eFREE);
-
-	PxReal twistLimit = getConfigF("C_TWIST_LIMIT");
-	joint->setLimit(PxArticulationAxis::eTWIST, -twistLimit, twistLimit);
 }
 
 void SphericalJoint::enableDrive(std::string name) {
-	PxReal kp = getConfigF("P_KP_" + name);
-	PxReal kd = getConfigF("P_KD_" + name);
-	PxReal fl = getConfigF("P_FL_" + name);
-
-	joint->setDrive(PxArticulationAxis::eTWIST, kp, kd, fl);
-	joint->setDrive(PxArticulationAxis::eSWING1, kp, kd, fl);
-	joint->setDrive(PxArticulationAxis::eSWING2, kp, kd, fl);
 }
 
 RevoluteJoint::RevoluteJoint(Link *link, PxArticulationAxis::Enum axis,
 	PxTransform parentPose, PxTransform childPose)
 	: Joint(link, parentPose, childPose), axis(axis) {
-	joint->setJointType(PxArticulationJointType::eREVOLUTE);
-	joint->setMotion(axis, PxArticulationMotion::eFREE);
 }
 
 void RevoluteJoint::enableDrive(std::string name) {
-	PxReal kp = getConfigF("P_KP_" + name);
-	PxReal kd = getConfigF("P_KD_" + name);
-	PxReal fl = getConfigF("P_FL_" + name);
-
-	joint->setDrive(axis, kp, kd, fl);
 }
 
 Link::Link(Link *parent, PxTransform transform, LinkBody *body)

@@ -18,9 +18,9 @@ extern PxMaterial*				gMaterial;
 
 extern PxPvd*					gPvd;
 
-extern PxArticulationReducedCoordinate*			gArticulation;
-extern PxArticulationJointReducedCoordinate*	gDriveJoint;
-extern PxArticulationCache*						gCache;
+extern PxArticulation*			gArticulation;
+//extern PxArticulationJointReducedCoordinate*	gDriveJoint;
+//extern PxArticulationCache*						gCache;
 
 void loader();
 void initControl();
