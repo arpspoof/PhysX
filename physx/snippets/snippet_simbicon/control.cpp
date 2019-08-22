@@ -103,7 +103,7 @@ void control(PxReal dt, int contactFlag) {
 	targetVelocities = vector<float>(24, 0.f);
 
 	simbicon_tick(dt, contactFlag);
-	simbicon_setTargets();
+//	simbicon_setTargets();
 
 	PxReal *positions = gCache->jointPosition;
 	PxReal *velocities = gCache->jointVelocity;
@@ -111,14 +111,14 @@ void control(PxReal dt, int contactFlag) {
 
 	memset(forces, 0, sizeof(PxReal) * gArticulation->getDofs());
 
-/*	for (int i = 0; i < 24; i++) {
+	for (int i = 0; i < 24; i++) {
 		forces[i] = kps[i] * (targetPositions[i] - positions[i]) + kds[i] * (targetVelocities[i] - velocities[i]);
 		if (forces[i] > fls[i] ) {
 		//	forces[i] = fls[i] ;
 		}
-	}*/
+	}
 
-	for (auto &kvp : ar.jointMap) {
+/*	for (auto &kvp : ar.jointMap) {
 		auto &joint = kvp.second;
 
 		int nDof = joint->nDof;
@@ -189,7 +189,7 @@ void control(PxReal dt, int contactFlag) {
 		}
 	}
 
-	simbicon_updateForces();
+	simbicon_updateForces();*/
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 }
