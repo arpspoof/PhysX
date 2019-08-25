@@ -154,6 +154,9 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 
 	vlo = qLocal.rotate(vlo);
 
+	///////////// try rotate to world
+	vlo = qNeck.rotate(PxVec3(velocities[0], velocities[1], velocities[2]));
+
 	printf("a0 = %f,%f,%f; v1 = %f,%f,%f; p = %f,%f,%f\n", 
 		acc[0], acc[1], acc[2], vlo[0], vlo[1], vlo[2], p[0], p[1], p[2]);
 
@@ -161,4 +164,14 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 	//printf("v = %f, %f, %f; q = %f, %f, %f, %f\n", v[0], v[1], v[2], qLocal.w, qLocal.x, qLocal.y, qLocal.z);
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
+
+	PxArticulationCache* tmp = gArticulation->createCache();
+	PxU32 nr, nc;
+	gArticulation->computeDenseJacobian(*tmp, nr, nc);
+	for (PxU32 i = 0; i < nr; i++) {
+		for (PxU32 j = 0; j < nc; j++) {
+			printf("%f\t", tmp->denseJacobian[i * nc + j]);
+		}
+		printf("\n");
+	}
 }

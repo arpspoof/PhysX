@@ -4030,7 +4030,7 @@ namespace Dy
 			destRow += 6;
 		}
 
-#if 0  //Enable this if you want to compare results of this function with results of computeLinkVelocities().
+#if 1  //Enable this if you want to compare results of this function with results of computeLinkVelocities().
 
 		PxReal * jointVels = mArticulationData.getJointVelocities();//size is totalDofs
 
@@ -4040,19 +4040,6 @@ namespace Dy
 		PxU32 offset = 0;
 
 		//stack input:
-
-		if (!fixBase)
-		{
-			jointSpaceVelsVector[0] = core0.linearVelocity[0];
-			jointSpaceVelsVector[1] = core0.linearVelocity[1];
-			jointSpaceVelsVector[2] = core0.linearVelocity[2];
-
-			jointSpaceVelsVector[3] = core0.angularVelocity[0];
-			jointSpaceVelsVector[4] = core0.angularVelocity[1];
-			jointSpaceVelsVector[5] = core0.angularVelocity[2];
-
-			offset = 6;
-		}
 
 		for (PxU32 i = 0; i < totalDofs; i++)
 			jointSpaceVelsVector[i + offset] = jointVels[i];
@@ -4072,8 +4059,6 @@ namespace Dy
 
 		delete[] jointSpaceVelsVector;
 		delete[] worldSpaceVelsVector;
-
-		allocator->free(tempMemory);
 #endif
 	}
 
