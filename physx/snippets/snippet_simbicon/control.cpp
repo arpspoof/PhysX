@@ -157,7 +157,10 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 	///////////// try rotate to world
 	vlo = qNeck.rotate(PxVec3(velocities[0], velocities[1], velocities[2]));
 
-	printf("a0 = %f,%f,%f; v1 = %f,%f,%f; p = %f,%f,%f\n", 
+	// use joint space v
+	vlo = PxVec3(velocities[0], velocities[1], velocities[2]);
+
+	printf("a0 = %f,%f,%f; v1 = %f,%f,%f; p = [x=%f,y=%f,z=%f]\n", 
 		acc[0], acc[1], acc[2], vlo[0], vlo[1], vlo[2], p[0], p[1], p[2]);
 
 	//v = qNeck.getConjugate().rotate(v);
@@ -165,13 +168,38 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 
+	printf("mass matrix:\n");
 	PxArticulationCache* tmp = gArticulation->createCache();
-	PxU32 nr, nc;
-	gArticulation->computeDenseJacobian(*tmp, nr, nc);
-	for (PxU32 i = 0; i < nr; i++) {
-		for (PxU32 j = 0; j < nc; j++) {
-			printf("%f\t", tmp->denseJacobian[i * nc + j]);
+	gArticulation->commonInit();
+	gArticulation->computeGeneralizedMassMatrix(*tmp);
+
+	PxU32 nDof = gArticulation->getDofs();
+
+	for (PxU32 i = 0; i < nDof; i++) {
+		for (PxU32 j = 0; j < nDof; j++) {
+			printf("%f\t", tmp->massMatrix[i * nDof + j]);
 		}
 		printf("\n");
+	}
+
+	PxVec3 compos(0.48f, 0, 0);
+	compos = getQuat(p[0], p[1], p[2]).rotate(compos);
+	compos.x += 0.944604;
+	compos = PxQuat(PxPi/2, PxVec3(0,0,1)).rotate(compos);
+	compos.y += 4.55f;
+	printf("my com %f, %f, %f\n", compos.x, compos.y, compos.z);
+	auto link = ar.linkMap["chest"]->link;
+	auto com = link->getGlobalPose().transform(link->getCMassLocalPose().p);
+	printf("com %f, %f, %f\n", com.x, com.y, com.z);
+
+	PxArticulationCache *tmp2 = gArticulation->createCache();
+	PxU32 nr,nc;
+	gArticulation->computeDenseJacobian(*tmp2, nr, nc);
+	printf("dense jacobian:\n");
+	for (int i = 0; i < nr; i++) {
+		for (int j = 0; j < nc; j++) {
+			printf("%f%c\t", tmp2->denseJacobian[i * nc + j], j == nc - 1 ? '|' : ',');
+		}
+	printf("\n");
 	}
 }
