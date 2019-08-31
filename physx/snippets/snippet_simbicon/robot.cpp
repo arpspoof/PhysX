@@ -15,8 +15,8 @@ extern Articulation ar;
 NULLLinkBody bodyBase;
 SphereLinkBody bodyRoot(6.f, 0.1f);
 //SphereLinkBody bodyChest(5.f, 0.44f); 
-BoxLinkBody bodyChest(5.f, 0.2f, 0.3f, 0.4f);
-SphereLinkBody bodyNeck(2.f, 0.41f);
+BoxLinkBody bodyChest(15.f, 0.2f, 0.3f, 0.4f);
+BoxLinkBody bodyNeck(6.f, 0.41f, 0.25f, 0.36f);
 CapsuleLinkBody bodyHip(4.5f, 0.22f, 1.2f);
 CapsuleLinkBody bodyKnee(3.f, 0.2f, 1.24f);
 CapsuleLinkBody bodyShoulder(1.5f, 0.18f, 0.72f);
@@ -127,8 +127,8 @@ void loadRoot() {
 	arTree.addSpericalDescriptionNode(descrChest);
 	arTree.connect("root", "chest");
 
-//	arTree.addSpericalDescriptionNode(descrNeck);
-//	arTree.connect("chest", "neck");
+	arTree.addSpericalDescriptionNode(descrNeck);
+	arTree.connect("chest", "neck");
 
 	arTree.buildArticulation(ar);
 

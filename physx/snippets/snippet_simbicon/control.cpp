@@ -96,6 +96,14 @@ void initControl() {
 
 int counter = 0;
 
+void printFar(PxReal *arr, int n) {
+	printf("[ ");
+	for (int i = 0; i < n - 1; i++) {
+		printf("%f, ", arr[i]);
+	}
+	printf("%f ]\n", arr[n - 1]);
+}
+
 void control(PxReal /*dt*/, int /*contactFlag*/) {
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
@@ -128,15 +136,18 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 
 	PxVec3 v = ar.linkMap["chest"]->link->getAngularVelocity();
 	PxQuat qNeck = ar.linkMap["chest"]->link->getGlobalPose().q;
-	PxQuat qChest = ar.linkMap["root"]->link->getGlobalPose().q;
+/*	PxQuat qChest = ar.linkMap["root"]->link->getGlobalPose().q;
 	PxQuat qLocal = qChest.getConjugate() * qNeck;
 
-	testF = qLocal.getConjugate().rotate(testF);
+	testF = qLocal.getConjugate().rotate(testF);*/
 
 	if (1 || counter <= 500) {
 		forces[0] = testF.x * 4;
 		forces[1] = testF.y * 4;
 		forces[2] = testF.z * 4;
+		forces[3] = testF.z * 2;
+		forces[4] = testF.x * 5;
+		forces[5] = testF.y * 3;
 	}
 	else {
 		forces[0] = 0;
@@ -145,26 +156,29 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 	}
 
 	PxReal *velocities = gCache->jointVelocity;
-	PxReal *acc = gCache->jointAcceleration;
 
 
 	PxReal *p = gCache->jointPosition;
 
 	PxVec3 vlo(velocities[0], velocities[1], velocities[2]);
 
-	vlo = qLocal.rotate(vlo);
+//	vlo = qLocal.rotate(vlo);
 
 	///////////// try rotate to world
-	vlo = qNeck.rotate(PxVec3(velocities[0], velocities[1], velocities[2]));
+	PxVec3 vloWorld = ar.linkMap["chest"]->link->getAngularVelocity();
 
-	// use joint space v
-	vlo = PxVec3(velocities[0], velocities[1], velocities[2]);
+	printf("vloWorld = %f,%f,%f; v1 = %f,%f,%f; p = [x=%f,y=%f,z=%f]\n", 
+		vloWorld[0], vloWorld[1], vloWorld[2], vlo[0], vlo[1], vlo[2], p[0], p[1], p[2]);
 
-	printf("a0 = %f,%f,%f; v1 = %f,%f,%f; p = [x=%f,y=%f,z=%f]\n", 
-		acc[0], acc[1], acc[2], vlo[0], vlo[1], vlo[2], p[0], p[1], p[2]);
+	printf("gpose: %f, %f, %f, %f\n", qNeck.x, qNeck.y, qNeck.z, qNeck.w);
 
 	//v = qNeck.getConjugate().rotate(v);
 	//printf("v = %f, %f, %f; q = %f, %f, %f, %f\n", v[0], v[1], v[2], qLocal.w, qLocal.x, qLocal.y, qLocal.z);
+
+	PxU32 nDof = gArticulation->getDofs();
+
+	printf("joint force:\n");
+	printFar(forces, nDof);
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 
@@ -173,33 +187,25 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 	gArticulation->commonInit();
 	gArticulation->computeGeneralizedMassMatrix(*tmp);
 
-	PxU32 nDof = gArticulation->getDofs();
-
 	for (PxU32 i = 0; i < nDof; i++) {
 		for (PxU32 j = 0; j < nDof; j++) {
-			printf("%f\t", tmp->massMatrix[i * nDof + j]);
+			printf("%f\t%c", tmp->massMatrix[i * nDof + j], j == nDof - 1 ? '|' : ',');
 		}
 		printf("\n");
 	}
 
-	PxVec3 compos(0.48f, 0, 0);
-	compos = getQuat(p[0], p[1], p[2]).rotate(compos);
-	compos.x += 0.944604;
-	compos = PxQuat(PxPi/2, PxVec3(0,0,1)).rotate(compos);
-	compos.y += 4.55f;
-	printf("my com %f, %f, %f\n", compos.x, compos.y, compos.z);
-	auto link = ar.linkMap["chest"]->link;
-	auto com = link->getGlobalPose().transform(link->getCMassLocalPose().p);
-	printf("com %f, %f, %f\n", com.x, com.y, com.z);
+	PxReal *acc = gCache->jointAcceleration;
+	printf("joint acceleration:\n");
+	printFar(acc, nDof);
 
-	PxArticulationCache *tmp2 = gArticulation->createCache();
-	PxU32 nr,nc;
-	gArticulation->computeDenseJacobian(*tmp2, nr, nc);
-	printf("dense jacobian:\n");
-	for (int i = 0; i < nr; i++) {
-		for (int j = 0; j < nc; j++) {
-			printf("%f%c\t", tmp2->denseJacobian[i * nc + j], j == nc - 1 ? '|' : ',');
-		}
-	printf("\n");
-	}
+	PxArticulationCache* tmp2 = gArticulation->createCache();
+	gArticulation->copyInternalStateToCache(*tmp2, PxArticulationCache::eVELOCITY);
+	gArticulation->computeCoriolisAndCentrifugalForce(*tmp2);
+	printf("corr and centrifugal:\n");
+	printFar(tmp2->jointForce, nDof);
+
+	PxArticulationCache* tmp3 = gArticulation->createCache();
+	gArticulation->computeGeneralizedGravityForce(*tmp3);
+	printf("gravity:\n");
+	printFar(tmp3->jointForce, nDof);
 }
