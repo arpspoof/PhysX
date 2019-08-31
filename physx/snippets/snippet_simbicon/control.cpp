@@ -96,6 +96,14 @@ PxQuat getPositionDifference(PxVec3 after, PxVec3 before) {
 	return getQuat(after) * getQuat(before).getConjugate();
 }
 
+void printFar(PxReal *arr, int n) {
+	printf("");
+	for (int i = 0; i < n - 1; i++) {
+		printf("%f; ", arr[i]);
+	}
+	printf("%f\n", arr[n - 1]);
+}
+
 void control(PxReal dt, int contactFlag) {
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
@@ -192,4 +200,39 @@ void control(PxReal dt, int contactFlag) {
 	simbicon_updateForces();
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
+
+	PxU32 nDof = gArticulation->getDofs();
+
+	printf("joint force:\n");
+	printFar(forces, nDof);
+
+	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
+
+	printf("mass matrix:\n");
+	PxArticulationCache* tmp = gArticulation->createCache();
+	gArticulation->commonInit();
+	gArticulation->computeGeneralizedMassMatrix(*tmp);
+
+	for (PxU32 i = 0; i < nDof; i++) {
+		for (PxU32 j = 0; j < nDof; j++) {
+			printf("%f ", tmp->massMatrix[i * nDof + j]);
+		}
+		printf(";\n");
+	}
+
+	PxReal *acc = gCache->jointAcceleration;
+	printf("joint acceleration:\n");
+	printFar(acc, nDof);
+
+	PxArticulationCache* tmp2 = gArticulation->createCache();
+	gArticulation->copyInternalStateToCache(*tmp2, PxArticulationCache::eVELOCITY);
+	gArticulation->computeCoriolisAndCentrifugalForce(*tmp2);
+	printf("corr and centrifugal:\n");
+	printFar(tmp2->jointForce, nDof);
+
+	PxArticulationCache* tmp3 = gArticulation->createCache();
+	gArticulation->computeGeneralizedGravityForce(*tmp3);
+	printf("gravity:\n");
+	printFar(tmp3->jointForce, nDof);
+
 }
