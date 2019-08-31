@@ -182,6 +182,9 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 
+	printf("joint force 2:\n");
+	printFar(gCache->jointForce, nDof);
+
 	printf("mass matrix:\n");
 	PxArticulationCache* tmp = gArticulation->createCache();
 	gArticulation->commonInit();
