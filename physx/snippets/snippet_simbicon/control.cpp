@@ -77,6 +77,8 @@ std::vector<string> nameList{
 vector<float> kps, kds, fls;
 vector<float> targetPositions, targetVelocities;
 
+static PxArticulationCache *tmpcache, *tmpcache2, *tmpcache3;
+
 void initControl() {
 	for (string &name : nameList) {
 		PxU32 nDof = ar.linkMap[name]->link->getInboundJointDof();
@@ -94,6 +96,9 @@ void initControl() {
 		targetPositions.push_back(0);
 		targetVelocities.push_back(0);
 	}
+	tmpcache = gArticulation->createCache();
+	tmpcache2 = gArticulation->createCache();
+	tmpcache3 = gArticulation->createCache();
 }
 
 PxQuat getPositionDifference(PxVec3 after, PxVec3 before) {
@@ -116,62 +121,34 @@ void printFard(double *arr, int n) {
 	printf("%lf\n", arr[n - 1]);
 }
 
+VectorXd Sol;
+
 void control(PxReal dt, int contactFlag) {
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
 //////////////////////////////////////
 	PxU32 nnDof = gArticulation->getDofs();
 
-	printf("mass matrix:\n");
-	PxArticulationCache* tmp = gArticulation->createCache();
 	gArticulation->commonInit();
-	gArticulation->computeGeneralizedMassMatrix(*tmp);
+	gArticulation->computeGeneralizedMassMatrix(*tmpcache);
 
-	for (PxU32 i = 0; i < nnDof; i++) {
-		for (PxU32 j = 0; j < nnDof; j++) {
-			printf("%f ", tmp->massMatrix[i * nnDof + j]);
-		}
-		printf(";\n");
-	}
+	gArticulation->copyInternalStateToCache(*tmpcache2, PxArticulationCache::eVELOCITY);
+	gArticulation->computeCoriolisAndCentrifugalForce(*tmpcache2);
 
-	printf("joint force:\n");
-	printFar(gCache->jointForce, nnDof);
-
-	PxArticulationCache* tmp2 = gArticulation->createCache();
-	gArticulation->copyInternalStateToCache(*tmp2, PxArticulationCache::eVELOCITY);
-	gArticulation->computeCoriolisAndCentrifugalForce(*tmp2);
-	printf("corr and centrifugal:\n");
-	printFar(tmp2->jointForce, nnDof);
-
-	PxArticulationCache* tmp3 = gArticulation->createCache();
-	gArticulation->computeGeneralizedGravityForce(*tmp3);
-	printf("gravity:\n");
-	printFar(tmp3->jointForce, nnDof);
-
-	PxReal *acc = gCache->jointAcceleration;
-	printf("joint acceleration:\n");
-	printFar(acc, nnDof);
+	gArticulation->computeGeneralizedGravityForce(*tmpcache3);
 
 	VectorXd FCG(nnDof);
-	VectorXd A(nnDof);
 	for (PxU32 i = 0; i < nnDof; i++) {
-		FCG(i) = gCache->jointForce[i] - tmp2->jointForce[i] - tmp3->jointForce[i];
-		A(i) = acc[i];
+		FCG(i) = gCache->jointForce[i] - tmpcache2->jointForce[i] - tmpcache3->jointForce[i];
 	}
 	MatrixXd H(nnDof, nnDof);
 	for (PxU32 i = 0; i < nnDof; i++) {
 		for (PxU32 j = i; j < nnDof; j++) {
-			H(i, j) = H(j, i) = tmp->massMatrix[i * nnDof + j];
+			H(i, j) = H(j, i) = tmpcache->massMatrix[i * nnDof + j];
 		}
 	}
 
-	printf("solved acceleration:\n");
-	VectorXd Sol = H.llt().solve(FCG);
-	printFard(Sol.data(), nnDof);
-
-	printf("difference:\n");
-	VectorXd Diff = Sol - A;
-	printFard(Diff.data(), nnDof);
+	Sol = H.llt().solve(FCG);
 
 /////////////////////////////////////////
 
