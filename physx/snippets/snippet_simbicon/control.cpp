@@ -4,6 +4,10 @@
 #include "articulationTree.h"
 #include "simbicon.h"
 
+#include <Eigen/Dense>
+
+using namespace Eigen;
+
 PxReal twistTarget, swing1Target, swing2Target;
 
 extern Articulation ar;
@@ -104,6 +108,14 @@ void printFar(PxReal *arr, int n) {
 	printf("%f\n", arr[n - 1]);
 }
 
+void printFard(double *arr, int n) {
+	printf("");
+	for (int i = 0; i < n - 1; i++) {
+		printf("%lf; ", arr[i]);
+	}
+	printf("%lf\n", arr[n - 1]);
+}
+
 void control(PxReal dt, int contactFlag) {
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
@@ -125,10 +137,6 @@ void control(PxReal dt, int contactFlag) {
 	printf("joint force:\n");
 	printFar(gCache->jointForce, nnDof);
 
-	PxReal *acc = gCache->jointAcceleration;
-	printf("joint acceleration:\n");
-	printFar(acc, nnDof);
-
 	PxArticulationCache* tmp2 = gArticulation->createCache();
 	gArticulation->copyInternalStateToCache(*tmp2, PxArticulationCache::eVELOCITY);
 	gArticulation->computeCoriolisAndCentrifugalForce(*tmp2);
@@ -139,6 +147,31 @@ void control(PxReal dt, int contactFlag) {
 	gArticulation->computeGeneralizedGravityForce(*tmp3);
 	printf("gravity:\n");
 	printFar(tmp3->jointForce, nnDof);
+
+	PxReal *acc = gCache->jointAcceleration;
+	printf("joint acceleration:\n");
+	printFar(acc, nnDof);
+
+	VectorXd FCG(nnDof);
+	VectorXd A(nnDof);
+	for (PxU32 i = 0; i < nnDof; i++) {
+		FCG(i) = gCache->jointForce[i] - tmp2->jointForce[i] - tmp3->jointForce[i];
+		A(i) = acc[i];
+	}
+	MatrixXd H(nnDof, nnDof);
+	for (PxU32 i = 0; i < nnDof; i++) {
+		for (PxU32 j = i; j < nnDof; j++) {
+			H(i, j) = H(j, i) = tmp->massMatrix[i * nnDof + j];
+		}
+	}
+
+	printf("solved acceleration:\n");
+	VectorXd Sol = H.llt().solve(FCG);
+	printFard(Sol.data(), nnDof);
+
+	printf("difference:\n");
+	VectorXd Diff = Sol - A;
+	printFard(Diff.data(), nnDof);
 
 /////////////////////////////////////////
 
