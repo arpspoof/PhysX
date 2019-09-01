@@ -4,6 +4,10 @@
 #include "articulationTree.h"
 #include "simbicon.h"
 
+#include <Eigen/Dense>
+
+using namespace Eigen;
+
 PxReal twistTarget, swing1Target, swing2Target;
 
 extern Articulation ar;
@@ -73,36 +77,71 @@ std::vector<string> nameList{
 vector<float> kps, kds, fls;
 vector<float> targetPositions, targetVelocities;
 
+PxArticulationCache *tmpcache, *tmpcache2, *tmpcache3;
+
 void initControl() {
-	for (string &name : nameList) {
-		PxU32 nDof = ar.linkMap[name]->link->getInboundJointDof();
-		PxReal kp = getConfigF("P_KP_" + name);
-		PxReal kd = getConfigF("P_KD_" + name);
-		PxReal fl = getConfigF("P_FL_" + name);
-		for (PxU32 i = 0; i < nDof; i++) {
-			kps.push_back(kp);
-			kds.push_back(kd);
-			fls.push_back(fl);
+	PxU32 totalDof = gArticulation->getDofs();
+
+	kps = vector<float>(totalDof);
+	kds = vector<float>(totalDof);
+	fls = vector<float>(totalDof);
+	targetPositions = vector<float>(totalDof, 0);
+	targetVelocities = vector<float>(totalDof, 0);
+
+	for (auto &kvp : ar.jointMap) {
+		auto &joint = kvp.second;
+		const string &name = kvp.first;
+
+		int nDof = joint->nDof;
+		int cacheIndex = joint->cacheIndex;
+
+		for (int i = 0; i < nDof; i++) {
+			kps[cacheIndex + i] = getConfigF("P_KP_" + name);
+			kds[cacheIndex + i] = getConfigF("P_KD_" + name);
+			fls[cacheIndex + i] = getConfigF("P_FL_" + name);
 		}
 	}
-	assert(kps.size() == 24);
-	for (int i = 0; i < 24; i++) {
-		targetPositions.push_back(0);
-		targetVelocities.push_back(0);
-	}
+
+	tmpcache = gArticulation->createCache();
+	tmpcache2 = gArticulation->createCache();
+	tmpcache3 = gArticulation->createCache();
 }
 
 PxQuat getPositionDifference(PxVec3 after, PxVec3 before) {
 	return getQuat(after) * getQuat(before).getConjugate();
 }
 
-void control(PxReal dt, int contactFlag) {
+void control(PxReal dt, int /*contactFlag*/) {
+	//////////////////////////////////////
+	PxU32 nnDof = gArticulation->getDofs();
+
+	gArticulation->commonInit();
+	gArticulation->computeGeneralizedMassMatrix(*tmpcache);
+
+	gArticulation->copyInternalStateToCache(*tmpcache2, PxArticulationCache::eVELOCITY);
+	gArticulation->computeCoriolisAndCentrifugalForce(*tmpcache2);
+
+	gArticulation->computeGeneralizedGravityForce(*tmpcache3);
+
+	VectorXd centrifugalCoriolisGravity(nnDof);
+	for (PxU32 i = 0; i < nnDof; i++) {
+		centrifugalCoriolisGravity(i) = -tmpcache2->jointForce[i] - tmpcache3->jointForce[i];
+	}
+	MatrixXd H(nnDof, nnDof);
+	for (PxU32 i = 0; i < nnDof; i++) {
+		for (PxU32 j = i; j < nnDof; j++) {
+			H(i, j) = H(j, i) = tmpcache->massMatrix[i * nnDof + j];
+		}
+	}
+
+	/////////////////////////////////////////
+
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
 	targetPositions = vector<float>(24, 0.f);
 	targetVelocities = vector<float>(24, 0.f);
 
-	simbicon_tick(dt, contactFlag);
+//	simbicon_tick(dt, contactFlag);
 //	simbicon_setTargets();
 
 	PxReal *positions = gCache->jointPosition;
@@ -111,14 +150,10 @@ void control(PxReal dt, int contactFlag) {
 
 	memset(forces, 0, sizeof(PxReal) * gArticulation->getDofs());
 
-	for (int i = 0; i < 24; i++) {
-		forces[i] = kps[i] * (targetPositions[i] - positions[i]) + kds[i] * (targetVelocities[i] - velocities[i]);
-		if (forces[i] > fls[i] ) {
-		//	forces[i] = fls[i] ;
-		}
-	}
+	VectorXd proportionalTorquePlusQDotDeltaT(nnDof);
+	VectorXd derivativeTorque(nnDof);
 
-/*	for (auto &kvp : ar.jointMap) {
+	for (auto &kvp : ar.jointMap) {
 		auto &joint = kvp.second;
 
 		int nDof = joint->nDof;
@@ -132,56 +167,50 @@ void control(PxReal dt, int contactFlag) {
 				positions[cacheIndex + 1], 
 				positions[cacheIndex + 2]
 			);
-			PxVec3 velocity(
-				velocities[cacheIndex],
-				velocities[cacheIndex + 1],
-				velocities[cacheIndex + 2]
-			);
 			PxVec3 targetPosition(
 				targetPositions[cacheIndex],
 				targetPositions[cacheIndex + 1],
 				targetPositions[cacheIndex + 2]
-			);
-			PxVec3 targetVelocity(
-				targetVelocities[cacheIndex],
-				targetVelocities[cacheIndex + 1],
-				targetVelocities[cacheIndex + 2]
 			);
 			PxVec3 kp(
 				kps[cacheIndex],
 				kps[cacheIndex + 1],
 				kps[cacheIndex + 2]
 			);
-			PxVec3 kd(
-				kds[cacheIndex],
-				kds[cacheIndex + 1],
-				kds[cacheIndex + 2]
-			);
 
 			PxQuat localRotation = getQuat(position);
-			PxVec3 velocityInParentFrame = localRotation.rotate(velocity);
 
 			PxQuat posDifference = getPositionDifference(targetPosition, position);
 			PxVec3 axis;
 			PxReal angle;
 			posDifference.toRadiansAndUnitAxis(angle, axis);
 
-			PxVec3 forceInParentFrame =
-				PxMat33::createDiagonal(kp) * axis * angle -
-				PxMat33::createDiagonal(kd) * velocityInParentFrame;
-			PxVec3 forceInChildFrame = localRotation.getConjugate().rotate(forceInParentFrame);
+			PxVec3 proportionalForceInParentFrame = PxMat33::createDiagonal(kp) * axis * angle;
+			PxVec3 proportionalForceInChildFrame = localRotation.getConjugate().rotate(proportionalForceInParentFrame);
 
-			forces[cacheIndex] = forceInChildFrame[0];
-			forces[cacheIndex + 1] = forceInChildFrame[1];
-			forces[cacheIndex + 2] = forceInChildFrame[2];
+			proportionalTorquePlusQDotDeltaT(cacheIndex) = proportionalForceInChildFrame[0] - 
+				dt * velocities[cacheIndex] * kps[cacheIndex];
+			proportionalTorquePlusQDotDeltaT(cacheIndex + 1) = proportionalForceInChildFrame[1] -
+				dt * velocities[cacheIndex + 1] * kps[cacheIndex + 1];
+			proportionalTorquePlusQDotDeltaT(cacheIndex + 2) = proportionalForceInChildFrame[2] -
+				dt * velocities[cacheIndex + 2] * kps[cacheIndex + 2];
+
+			derivativeTorque(cacheIndex) = -kds[cacheIndex] * velocities[cacheIndex];
+			derivativeTorque(cacheIndex + 1) = -kds[cacheIndex + 1] * velocities[cacheIndex + 1];
+			derivativeTorque(cacheIndex + 2) = -kds[cacheIndex + 2] * velocities[cacheIndex + 2];
+
+			H(cacheIndex, cacheIndex) += kds[cacheIndex] * dt;
+			H(cacheIndex + 1, cacheIndex + 1) += kds[cacheIndex + 1] * dt;
+			H(cacheIndex + 2, cacheIndex + 2) += kds[cacheIndex + 2] * dt;
 		}
 		else if (nDof == 1) {
 			PxReal position = positions[cacheIndex];
 			PxReal velocity = velocities[cacheIndex];
 			PxReal targetPosition = targetPositions[cacheIndex];
 			PxReal kp = kps[cacheIndex];
-			PxReal kd = kds[cacheIndex];
-			forces[cacheIndex] = kp * (targetPosition - position) - kd * velocity;
+			proportionalTorquePlusQDotDeltaT(cacheIndex) = kp * (targetPosition - position - dt * velocity);
+			derivativeTorque(cacheIndex) = -kds[cacheIndex] * velocity;
+			H(cacheIndex, cacheIndex) += kds[cacheIndex] * dt;
 		}
 		else {
 			printf("no controller defined for Dof %d\n", nDof);
@@ -189,7 +218,12 @@ void control(PxReal dt, int contactFlag) {
 		}
 	}
 
-	simbicon_updateForces();*/
+	VectorXd qDotDot = H.llt().solve(centrifugalCoriolisGravity + proportionalTorquePlusQDotDeltaT + derivativeTorque);
+	for (PxU32 i = 0; i < nnDof; i++) {
+		forces[i] = (PxReal)(proportionalTorquePlusQDotDeltaT(i) + derivativeTorque(i) - dt * kds[i] * qDotDot(i));
+	}
+
+//	simbicon_updateForces();
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 }
