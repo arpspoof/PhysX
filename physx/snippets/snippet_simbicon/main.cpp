@@ -254,8 +254,6 @@ void keyPress(unsigned char key, const PxTransform& camera)
 	keyHandler(key, camera);
 }
 
-#include <Eigen/Dense>
-
 int snippetMain(int argc, const char*const* argv)
 {
 	if (argc > 1) {
@@ -266,9 +264,10 @@ int snippetMain(int argc, const char*const* argv)
 		printf("no config file specified\n");
 	}
 
-/*	extern void renderLoop();
-	renderLoop();*/
-
+#if 1
+	extern void renderLoop();
+	renderLoop();
+#else
 	static const PxU32 frameCount = 10000;
 	initPhysics(false);
     auto starttime = high_resolution_clock::now();
@@ -278,13 +277,6 @@ int snippetMain(int argc, const char*const* argv)
     auto duration = duration_cast<microseconds>(endtime - starttime).count();
     printf("%lld\n", duration);
 	cleanupPhysics(false);
-
-	extern Eigen::VectorXd Sol;
-	for (int i = 0; i < 24; i++) {
-		printf("%lf ", Sol(i));
-	}
-
-	printf("\n");
-
+#endif
 	return 0;
 }
