@@ -264,10 +264,11 @@ int snippetMain(int argc, const char*const* argv)
 		printf("no config file specified\n");
 	}
 
+#if 1
 	extern void renderLoop();
 	renderLoop();
-
-/*	static const PxU32 frameCount = 10000;
+#else
+	static const PxU32 frameCount = 10000;
 	initPhysics(false);
     auto starttime = high_resolution_clock::now();
 	for(PxU32 i=0; i<frameCount; i++)
@@ -275,7 +276,7 @@ int snippetMain(int argc, const char*const* argv)
     auto endtime = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(endtime - starttime).count();
     printf("%lld\n", duration);
-	cleanupPhysics(false);*/
-
+	cleanupPhysics(false);
+#endif
 	return 0;
 }
