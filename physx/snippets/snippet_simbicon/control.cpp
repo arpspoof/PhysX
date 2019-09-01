@@ -111,29 +111,9 @@ PxQuat getPositionDifference(PxVec3 after, PxVec3 before) {
 	return getQuat(after) * getQuat(before).getConjugate();
 }
 
-void control(PxReal dt, int /*contactFlag*/) {
+void control(PxReal /*dt*/, int /*contactFlag*/) {
 	//////////////////////////////////////
 	PxU32 nnDof = gArticulation->getDofs();
-
-	gArticulation->commonInit();
-	gArticulation->computeGeneralizedMassMatrix(*tmpcache);
-
-	gArticulation->copyInternalStateToCache(*tmpcache2, PxArticulationCache::eVELOCITY);
-	gArticulation->computeCoriolisAndCentrifugalForce(*tmpcache2);
-
-	gArticulation->computeGeneralizedGravityForce(*tmpcache3);
-
-	VectorXd centrifugalCoriolisGravity(nnDof);
-	for (PxU32 i = 0; i < nnDof; i++) {
-		centrifugalCoriolisGravity(i) = -tmpcache2->jointForce[i] - tmpcache3->jointForce[i];
-	}
-	MatrixXd H(nnDof, nnDof);
-	for (PxU32 i = 0; i < nnDof; i++) {
-		for (PxU32 j = i; j < nnDof; j++) {
-			H(i, j) = H(j, i) = tmpcache->massMatrix[i * nnDof + j];
-		}
-	}
-
 	/////////////////////////////////////////
 
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
@@ -188,29 +168,21 @@ void control(PxReal dt, int /*contactFlag*/) {
 			PxVec3 proportionalForceInParentFrame = PxMat33::createDiagonal(kp) * axis * angle;
 			PxVec3 proportionalForceInChildFrame = localRotation.getConjugate().rotate(proportionalForceInParentFrame);
 
-			proportionalTorquePlusQDotDeltaT(cacheIndex) = proportionalForceInChildFrame[0] - 
-				dt * velocities[cacheIndex] * kps[cacheIndex];
-			proportionalTorquePlusQDotDeltaT(cacheIndex + 1) = proportionalForceInChildFrame[1] -
-				dt * velocities[cacheIndex + 1] * kps[cacheIndex + 1];
-			proportionalTorquePlusQDotDeltaT(cacheIndex + 2) = proportionalForceInChildFrame[2] -
-				dt * velocities[cacheIndex + 2] * kps[cacheIndex + 2];
+			proportionalTorquePlusQDotDeltaT(cacheIndex) = proportionalForceInChildFrame[0];
+			proportionalTorquePlusQDotDeltaT(cacheIndex + 1) = proportionalForceInChildFrame[1];
+			proportionalTorquePlusQDotDeltaT(cacheIndex + 2) = proportionalForceInChildFrame[2];
 
 			derivativeTorque(cacheIndex) = -kds[cacheIndex] * velocities[cacheIndex];
 			derivativeTorque(cacheIndex + 1) = -kds[cacheIndex + 1] * velocities[cacheIndex + 1];
 			derivativeTorque(cacheIndex + 2) = -kds[cacheIndex + 2] * velocities[cacheIndex + 2];
-
-			H(cacheIndex, cacheIndex) += kds[cacheIndex] * dt;
-			H(cacheIndex + 1, cacheIndex + 1) += kds[cacheIndex + 1] * dt;
-			H(cacheIndex + 2, cacheIndex + 2) += kds[cacheIndex + 2] * dt;
 		}
 		else if (nDof == 1) {
 			PxReal position = positions[cacheIndex];
 			PxReal velocity = velocities[cacheIndex];
 			PxReal targetPosition = targetPositions[cacheIndex];
 			PxReal kp = kps[cacheIndex];
-			proportionalTorquePlusQDotDeltaT(cacheIndex) = kp * (targetPosition - position - dt * velocity);
+			proportionalTorquePlusQDotDeltaT(cacheIndex) = kp * (targetPosition - position);
 			derivativeTorque(cacheIndex) = -kds[cacheIndex] * velocity;
-			H(cacheIndex, cacheIndex) += kds[cacheIndex] * dt;
 		}
 		else {
 			printf("no controller defined for Dof %d\n", nDof);
@@ -218,9 +190,8 @@ void control(PxReal dt, int /*contactFlag*/) {
 		}
 	}
 
-	VectorXd qDotDot = H.llt().solve(centrifugalCoriolisGravity + proportionalTorquePlusQDotDeltaT + derivativeTorque);
 	for (PxU32 i = 0; i < nnDof; i++) {
-		forces[i] = (PxReal)(proportionalTorquePlusQDotDeltaT(i) + derivativeTorque(i) - dt * kds[i] * qDotDot(i));
+		forces[i] = (PxReal)(proportionalTorquePlusQDotDeltaT(i) + derivativeTorque(i));
 	}
 
 //	simbicon_updateForces();
