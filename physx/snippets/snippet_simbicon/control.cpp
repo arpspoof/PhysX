@@ -221,6 +221,7 @@ void control(PxReal dt, int contactFlag) {
 	VectorXd qDotDot = H.llt().solve(centrifugalCoriolisGravity + proportionalTorquePlusQDotDeltaT + derivativeTorque);
 	for (PxU32 i = 0; i < nnDof; i++) {
 		forces[i] = (PxReal)(proportionalTorquePlusQDotDeltaT(i) + derivativeTorque(i) - dt * kds[i] * qDotDot(i));
+		forces[i] = min(forces[i], fls[i]);
 	}
 
 	simbicon_updateForces();
