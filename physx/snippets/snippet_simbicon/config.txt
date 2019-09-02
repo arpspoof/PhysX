@@ -17,6 +17,7 @@ P_FL_right_elbow	float	60.000000
 P_FL_right_hip	float	200.000000
 P_FL_right_knee	float	150.000000
 P_FL_right_shoulder	float	100.000000
+P_FL_root	float	200.000000
 P_KD_chest	float	100.000000
 P_KD_left_ankle	float	10.000000
 P_KD_left_elbow	float	30.000000
@@ -29,7 +30,7 @@ P_KD_right_elbow	float	30.000000
 P_KD_right_hip	float	50.000000
 P_KD_right_knee	float	50.000000
 P_KD_right_shoulder	float	40.000000
-P_KD_root	float	200.000000
+P_KD_root	float	50.000000
 P_KP_chest	float	500.000000
 P_KP_left_ankle	float	50.000000
 P_KP_left_elbow	float	150.000000
@@ -42,11 +43,11 @@ P_KP_right_elbow	float	150.000000
 P_KP_right_hip	float	250.000000
 P_KP_right_knee	float	250.000000
 P_KP_right_shoulder	float	200.000000
-P_KP_root	float	1000.000000
 P_CD_SAGITAL	float	0.5
 P_CV_SAGITAL	float	0.2
 P_CD_CORONAL	float	0.5
 P_CV_CORONAL	float	0.2
+P_KP_root	float	500.000000
 S_ENABLE_GPU_BROADPHASE	int	0
 S_ENABLE_GPU_DYNAMICS	int	0
 S_GROUND	int	1

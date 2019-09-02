@@ -2,6 +2,7 @@
 #include "simbicon_interface.h"
 #include "config.h"
 #include <stdio.h>
+#include <algorithm>
 
 float timer = 0;
 
@@ -33,8 +34,8 @@ void simbicon_tick(float dt, int contact) {
 }
 
 void simbicon_setTargets() {
-	float swingHipSwing = 0.75f;
-	float swingHipStrike = -0.2f;
+	float swingHipSwing = 0.6f;
+	float swingHipStrike = -0.1f;
 	float swingKneeSwing = -1.1f;
 	float swingKneeStrike = -0.05f;
 	float stanceKneeSwing = -0.05f;
@@ -43,7 +44,7 @@ void simbicon_setTargets() {
 	float swingAnkleStrike = 0.05f;
 	float stanceAnkle = 0.0f;
 
-	setChestTarget(vec3(0, 0, -0.2f));
+//	setChestTarget(vec3(0, 0, -0.2f));
 
 	vec3 stanceFootCOM = state < 2 ? getRFootCOMGlobalPos() : getLFootCOMGlobalPos();
 	vec3 stanceFootToCenterCOM = getCOMGlobalPos() - stanceFootCOM;
@@ -58,18 +59,19 @@ void simbicon_setTargets() {
 	float balanceCoronal = stanceFootToCenterCOM.z * cdCoronal + comV.z * cvCoronal;
 
 	float swingHipSagitalGlobal = (state & 1 ? swingHipStrike : swingHipSwing) + balanceSagital;
-	float swingHipCoronalGlobal = -balanceCoronal;
+	float swingHipCoronalGlobal = balanceCoronal;
 
 	quat swingHipGlobal =
-		quat(swingHipSagitalGlobal, vec3(0, 0, 1)) *
-		quat(swingHipCoronalGlobal, vec3(0, -1, 0));
+		quat(swingHipCoronalGlobal, vec3(0, 1, 0)) *
+		quat(swingHipSagitalGlobal, vec3(0, 0, 1));
 
-	vec3 axis(swingHipGlobal.x, swingHipGlobal.y, swingHipGlobal.z);
-	float angle = 2 * atan2(axis.magnitude(), swingHipGlobal.w);
-	vec3 expMap = axis.getNormalized() * angle;
-	expMap[0] = 0;
+	float angle;
+	vec3 axis;
+	swingHipGlobal.toRadiansAndUnitAxis(angle, axis);
+	axis *= angle;
+	axis[0] = 0;
 
-	expMap = vec3(0, -swingHipCoronalGlobal, swingHipSagitalGlobal);
+	vec3 expMap = axis;
 
 	switch (state) {
 	case 0:
@@ -135,6 +137,7 @@ void simbicon_updateForces() {
 
 	float kp = getConfigF("P_KP_root");
 	float kd = getConfigF("P_KD_root");
+	float fl = getConfigF("P_FL_root");
 
 	quat rtz(0, 0, 0.7071068f, 0.7071068f);
 	quat targetDifference = rtz * rootOri.getConjugate();
@@ -143,7 +146,12 @@ void simbicon_updateForces() {
 	float targetDiffAngle;
 	targetDifference.toRadiansAndUnitAxis(targetDiffAngle, targetDiffAxis);
 
-	vec3 rootForceGlobal = targetDiffAngle * kp * targetDiffAxis - kd * rtz.getConjugate().rotate(rootAngularV);
+	vec3 rootForceGlobal = targetDiffAngle * kp * targetDiffAxis - kd * rootAngularV;
+
+	rootForceGlobal[0] = std::min(rootForceGlobal[0], fl);
+	rootForceGlobal[1] = std::min(rootForceGlobal[1], fl);
+	rootForceGlobal[2] = std::min(rootForceGlobal[2], fl);
+
 	vec3 rootForceInRootFrame = rootOri.getConjugate().rotate(rootForceGlobal);
 
 	vec3 chestForceInRootFrame = getChestOriLocal().rotate(getChestForce());

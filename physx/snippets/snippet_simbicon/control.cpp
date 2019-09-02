@@ -224,6 +224,11 @@ void control(PxReal dt, int contactFlag) {
 		forces[i] = min(forces[i], fls[i]);
 	}
 
+/*	for (PxU32 i = 0; i < nnDof; i++) {
+		forces[i] = (PxReal)(proportionalTorquePlusQDotDeltaT(i) + derivativeTorque(i) + dt * kps[i] * velocities[i]);
+		forces[i] = min(forces[i], fls[i]);
+	}*/
+
 	simbicon_updateForces();
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
