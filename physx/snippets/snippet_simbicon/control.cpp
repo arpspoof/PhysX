@@ -4,7 +4,7 @@
 #include "articulationTree.h"
 #include "simbicon.h"
 
-#include <Eigen/Dense>
+#include <../../../eigen/Eigen/Dense>
 
 using namespace Eigen;
 
