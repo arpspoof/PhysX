@@ -254,6 +254,10 @@ void keyPress(unsigned char key, const PxTransform& camera)
 	keyHandler(key, camera);
 }
 
+PxReal motions[98][36];
+
+#include <fstream>
+
 int snippetMain(int argc, const char*const* argv)
 {
 	if (argc > 1) {
@@ -263,6 +267,17 @@ int snippetMain(int argc, const char*const* argv)
 	else {
 		printf("no config file specified\n");
 	}
+
+	ifstream motioninput("/home/zhiqiy/tmp/testMotion2.txt");
+	for (int i = 0; i < 32; i++) {
+		for (int j = 0; j < 43; j++) {
+			PxReal tmp;motioninput >> tmp;
+			if (j < 7) continue;
+			motions[i][j - 7] = tmp;
+			if (i == 0 ) printf("%f\n", motions[i][j - 7]);
+		}
+	}
+	motioninput.close();
 
 #if 1
 	extern void renderLoop();

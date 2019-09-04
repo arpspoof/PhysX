@@ -51,9 +51,9 @@ FixedDescriptionNode descrRWrist("right_wrist", "right_wrist", &bodyWrist,
 	PxVec3(0, 0, 0), PxVec3(0, -1.035788f, 0));
 FixedDescriptionNode descrLWrist("left_wrist", "left_wrist", &bodyWrist,
 	PxVec3(0, 0, 0), PxVec3(0, -1.035788f, 0));
-RevoluteDescriptionNode descrRAnkle("right_ankle", "right_ankle", &bodyAnkle, PxArticulationAxis::eSWING2,
+SpericalDescriptionNode descrRAnkle("right_ankle", "right_ankle", &bodyAnkle,
 	PxVec3(0.18f, -0.09f, 0), PxVec3(0, -1.63948f, 0));
-RevoluteDescriptionNode descrLAnkle("left_ankle", "left_ankle", &bodyAnkle, PxArticulationAxis::eSWING2,
+SpericalDescriptionNode descrLAnkle("left_ankle", "left_ankle", &bodyAnkle,
 	PxVec3(0.18f, -0.09f, 0), PxVec3(0, -1.63948f, 0));
 
 void loadRoot() {
@@ -83,10 +83,10 @@ void loadRoot() {
 	arTree.addRevoluteDescriptionNode(descrLKnee);
 	arTree.connect("left_hip", "left_knee");
 
-	arTree.addRevoluteDescriptionNode(descrRAnkle);
+	arTree.addSpericalDescriptionNode(descrRAnkle);
 	arTree.connect("right_knee", "right_ankle");
 
-	arTree.addRevoluteDescriptionNode(descrLAnkle);
+	arTree.addSpericalDescriptionNode(descrLAnkle);
 	arTree.connect("left_knee", "left_ankle");
 
 	arTree.addSpericalDescriptionNode(descrRShoulder);
@@ -109,7 +109,7 @@ void loadRoot() {
 
 	arTree.buildArticulation(ar);
 
-//	gArticulation->setArticulationFlag(PxArticulationFlag::Enum::eFIX_BASE, true);
+	gArticulation->setArticulationFlag(PxArticulationFlag::Enum::eFIX_BASE, true);
 
 	auto rightFoot = ar.linkMap["right_ankle"]->link;
 	auto leftFoot = ar.linkMap["left_ankle"]->link;
