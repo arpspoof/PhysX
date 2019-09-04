@@ -77,7 +77,7 @@ std::vector<string> nameList{
 vector<float> kps, kds, fls;
 vector<float> targetPositions, targetVelocities;
 
-PxArticulationCache *tmpcache, *tmpcache2, *tmpcache3;
+PxArticulationCache *tmpcache, *tmpcache2, *tmpcache3, *tmpcache4;
 
 void initControl() {
 	PxU32 totalDof = gArticulation->getDofs();
@@ -105,15 +105,49 @@ void initControl() {
 	tmpcache = gArticulation->createCache();
 	tmpcache2 = gArticulation->createCache();
 	tmpcache3 = gArticulation->createCache();
+	tmpcache4 = gArticulation->createCache();
 }
 
 PxQuat getPositionDifference(PxVec3 after, PxVec3 before) {
 	return getQuat(after) * getQuat(before).getConjugate();
 }
 
+void printFar(PxReal *arr, int n) {
+	printf("[ ");
+	for (int i = 0; i < n - 1; i++) {
+		printf("%f, ", arr[i]);
+	}
+	printf("%f ]\n", arr[n - 1]);
+}
+
+void printFar(double *arr, int n) {
+	printf("[ ");
+	for (int i = 0; i < n - 1; i++) {
+		printf("%f, ", arr[i]);
+	}
+	printf("%f ]\n", arr[n - 1]);
+}
+
+VectorXd calcAcc(24);
+
 void control(PxReal dt, int /*contactFlag*/) {
+	PxVec3 extforceaddneck(70, 0, 0);
+	ar.linkMap["neck"]->link->addForce(extforceaddneck);
+
 	//////////////////////////////////////
 	PxU32 nnDof = gArticulation->getDofs();
+
+	printf("actual accel\n");
+	printFar(gCache->jointAcceleration, nnDof);
+	printf("computed accel\n");
+	printFar(calcAcc.data(), nnDof);
+
+	VectorXd diff(nnDof);
+	for (int i = 0; i < nnDof; i++) {
+		diff(i) = calcAcc(i) - gCache->jointAcceleration[i];
+	}
+	printf("diff accel\n");
+	printFar(diff.data(), nnDof);
 
 	gArticulation->commonInit();
 	gArticulation->computeGeneralizedMassMatrix(*tmpcache);
@@ -123,9 +157,16 @@ void control(PxReal dt, int /*contactFlag*/) {
 
 	gArticulation->computeGeneralizedGravityForce(*tmpcache3);
 
+	auto &extf = tmpcache4->externalForces[ar.linkMap["neck"]->link->getLinkIndex()];
+	extf.force = extforceaddneck;
+	gArticulation->computeGeneralizedExternalForce(*tmpcache4);
+
+	printf("ext force\n");
+	printFar(tmpcache4->jointForce, nnDof);
+
 	VectorXd centrifugalCoriolisGravity(nnDof);
 	for (PxU32 i = 0; i < nnDof; i++) {
-		centrifugalCoriolisGravity(i) = -tmpcache2->jointForce[i] - tmpcache3->jointForce[i];
+		centrifugalCoriolisGravity(i) = -tmpcache2->jointForce[i] - tmpcache3->jointForce[i] - tmpcache4->jointForce[i];
 	}
 	MatrixXd H(nnDof, nnDof);
 	for (PxU32 i = 0; i < nnDof; i++) {
@@ -222,8 +263,26 @@ void control(PxReal dt, int /*contactFlag*/) {
 	for (PxU32 i = 0; i < nnDof; i++) {
 		forces[i] = (PxReal)(proportionalTorquePlusQDotDeltaT(i) + derivativeTorque(i) - dt * kds[i] * qDotDot(i));
 	}
+/*	for (PxU32 i = 0; i < nnDof; i++) {
+		forces[i] = 0;
+	}*/
 
 //	simbicon_updateForces();
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
+
+
+	MatrixXd HTmp(nnDof, nnDof);
+	for (PxU32 i = 0; i < nnDof; i++) {
+		for (PxU32 j = i; j < nnDof; j++) {
+			HTmp(i, j) = HTmp(j, i) = tmpcache->massMatrix[i * nnDof + j];
+		}
+	}
+
+	VectorXd jF(nnDof);
+	for (int i = 0; i < nnDof; i++) {
+		jF(i) = gCache->jointForce[i];
+	}
+
+	calcAcc = HTmp.fullPivHouseholderQr().solve(jF + centrifugalCoriolisGravity);
 }
