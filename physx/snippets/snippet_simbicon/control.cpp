@@ -4,6 +4,10 @@
 #include "articulationTree.h"
 #include "simbicon.h"
 
+#include "../../../eigen3/Eigen/Dense"
+
+using namespace Eigen;
+
 PxReal twistTarget, swing1Target, swing2Target;
 
 extern Articulation ar;
@@ -103,8 +107,19 @@ void printFar(PxReal *arr, int n) {
 	}
 	printf("%f ]\n", arr[n - 1]);
 }
+void printFar(double *arr, int n) {
+	printf("[ ");
+	for (int i = 0; i < n - 1; i++) {
+		printf("%f, ", arr[i]);
+	}
+	printf("%f ]\n", arr[n - 1]);
+}
+
+VectorXd calcAcc(6);
 
 void control(PxReal /*dt*/, int /*contactFlag*/) {
+	PxU32 nDof = gArticulation->getDofs();
+
 	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
 	targetPositions = vector<float>(24, 0.f);
@@ -141,19 +156,12 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 
 	testF = qLocal.getConjugate().rotate(testF);*/
 
-	if (1 || counter <= 500) {
-		forces[0] = testF.x * 4;
-		forces[1] = testF.y * 4;
-		forces[2] = testF.z * 4;
-		forces[3] = testF.z * 2;
-		forces[4] = testF.x * 5;
-		forces[5] = testF.y * 3;
-	}
-	else {
-		forces[0] = 0;
-		forces[1] = 0;
-		forces[2] = 0;
-	}
+	forces[0] = t*4;
+	forces[1] = a*4;
+	forces[2] = b*4;
+	forces[3] = rand() % 50;
+	forces[4] = rand() % 50;
+	forces[5] = rand() % 50;
 
 	PxReal *velocities = gCache->jointVelocity;
 
@@ -175,10 +183,23 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 	//v = qNeck.getConjugate().rotate(v);
 	//printf("v = %f, %f, %f; q = %f, %f, %f, %f\n", v[0], v[1], v[2], qLocal.w, qLocal.x, qLocal.y, qLocal.z);
 
-	PxU32 nDof = gArticulation->getDofs();
+
+	VectorXd curAcc(nDof);
+	for (int i = 0; i < nDof; i++) {
+		curAcc(i) = gCache->jointAcceleration[i];
+	}
+
+	printf("current acceleration\n");
+	printFar(curAcc.data(), nDof);
+	printf("prev acceleration calculated\n");
+	printFar(calcAcc.data(), nDof);
+	
+	VectorXd accdiff = calcAcc - curAcc;
+	printf("diff\n");
+	printFar(accdiff.data(), nDof);
 
 	printf("joint force:\n");
-	printFar(forces, nDof);
+	printFar(gCache->jointForce, nDof);
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 
@@ -197,10 +218,6 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 		printf("\n");
 	}
 
-	PxReal *acc = gCache->jointAcceleration;
-	printf("joint acceleration:\n");
-	printFar(acc, nDof);
-
 	PxArticulationCache* tmp2 = gArticulation->createCache();
 	gArticulation->copyInternalStateToCache(*tmp2, PxArticulationCache::eVELOCITY);
 	gArticulation->computeCoriolisAndCentrifugalForce(*tmp2);
@@ -211,4 +228,23 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 	gArticulation->computeGeneralizedGravityForce(*tmp3);
 	printf("gravity:\n");
 	printFar(tmp3->jointForce, nDof);
+
+	PxVec3 addedForce(50, 60, 70);
+	ar.linkMap["neck"]->link->addForce(addedForce);
+	PxArticulationCache* tmp4 = gArticulation->createCache();
+	tmp4->externalForces[ar.linkMap["neck"]->link->getLinkIndex()].force = addedForce;
+	gArticulation->computeGeneralizedExternalForce(*tmp4);
+
+	VectorXd rhs(nDof);
+	for (int i = 0; i < nDof; i++) {
+		rhs(i) = gCache->jointForce[i] - tmp2->jointForce[i] - tmp3->jointForce[i] - tmp4->jointForce[i];
+	}
+	MatrixXd H(nDof, nDof);
+	for (int i = 0; i < nDof; i++) {
+		for (int j = i; j < nDof; j++) {
+			H(i, j) = H(j, i) = tmp->massMatrix[i * nDof + j];
+		} 
+	}
+
+	calcAcc = H.fullPivHouseholderQr().solve(rhs);
 }
