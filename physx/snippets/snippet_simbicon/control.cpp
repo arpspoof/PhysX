@@ -218,11 +218,9 @@ void control(PxReal dt, int /*contactFlag*/) {
 				kps[cacheIndex + 2]
 			);
 
-			PxQuat rtz(PxPi / 2, PxVec3(0, 0, 1));
-			PxMat33 M(rtz);
-			PxMat33 Minv(rtz.getConjugate());
+			PxMat33 MTrans(PxQuat(-PxPi / 2, PxVec3(0, 0, 1)));
 			PxMat33 R(targetPosition);
-			PxMat33 RPrime = Minv*R*M;
+			PxMat33 RPrime = MTrans*R*MTrans.getTranspose();
 		//	RPrime=R;
 			targetPosition = PxQuat(RPrime);
 
@@ -284,9 +282,9 @@ void control(PxReal dt, int /*contactFlag*/) {
 	}
 
 	// PD
-	for (PxU32 i = 0; i < nnDof; i++) {
+/*	for (PxU32 i = 0; i < nnDof; i++) {
 		forces[i] = (PxReal)(proportionalTorquePlusQDotDeltaT(i) + derivativeTorque(i) + dt * kps[i] * velocities[i]);
-	}
+	}*/
 
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
 }
