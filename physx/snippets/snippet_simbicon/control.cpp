@@ -141,18 +141,6 @@ void control(PxReal dt, int /*contactFlag*/) {
 	//////////////////////////////////////
 	PxU32 nnDof = gArticulation->getDofs();
 
-	printf("actual accel\n");
-	printFar(gCache->jointAcceleration, nnDof);
-	printf("computed accel\n");
-	printFar(calcAcc.data(), nnDof);
-
-	VectorXd diff(nnDof);
-	for (int i = 0; i < nnDof; i++) {
-		diff(i) = calcAcc(i) - gCache->jointAcceleration[i];
-	}
-	printf("diff accel\n");
-	printFar(diff.data(), nnDof);
-
 	gArticulation->commonInit();
 	gArticulation->computeGeneralizedMassMatrix(*tmpcache);
 
@@ -165,12 +153,9 @@ void control(PxReal dt, int /*contactFlag*/) {
 	tmpcache4->externalForces[ar.linkMap["right_hip"]->link->getLinkIndex()].force = extforceaddRHip;
 	gArticulation->computeGeneralizedExternalForce(*tmpcache4);
 
-	printf("ext force\n");
-	printFar(tmpcache4->jointForce, nnDof);
-
-	VectorXd centrifugalCoriolisGravity(nnDof);
+	VectorXd centrifugalCoriolisGravityExternal(nnDof);
 	for (PxU32 i = 0; i < nnDof; i++) {
-		centrifugalCoriolisGravity(i) = -tmpcache2->jointForce[i] - tmpcache3->jointForce[i] - tmpcache4->jointForce[i];
+		centrifugalCoriolisGravityExternal(i) = -tmpcache2->jointForce[i] - tmpcache3->jointForce[i] - tmpcache4->jointForce[i];
 	}
 	MatrixXd H(nnDof, nnDof);
 	for (PxU32 i = 0; i < nnDof; i++) {
@@ -261,30 +246,15 @@ void control(PxReal dt, int /*contactFlag*/) {
 		}
 	}
 
-	VectorXd qDotDot = H.llt().solve(centrifugalCoriolisGravity + proportionalTorquePlusQDotDeltaT + derivativeTorque);
+	VectorXd qDotDot = H.llt().solve(centrifugalCoriolisGravityExternal + proportionalTorquePlusQDotDeltaT + derivativeTorque);
 	for (PxU32 i = 0; i < nnDof; i++) {
 		forces[i] = (PxReal)(proportionalTorquePlusQDotDeltaT(i) + derivativeTorque(i) - dt * kds[i] * qDotDot(i));
 	}
+
+	// PD
 /*	for (PxU32 i = 0; i < nnDof; i++) {
-		forces[i] = 0;
+		forces[i] = (PxReal)(proportionalTorquePlusQDotDeltaT(i) + derivativeTorque(i) + dt * kps[i] * velocities[i]);
 	}*/
 
-//	simbicon_updateForces();
-
 	gArticulation->applyCache(*gCache, PxArticulationCache::eFORCE);
-
-
-	MatrixXd HTmp(nnDof, nnDof);
-	for (PxU32 i = 0; i < nnDof; i++) {
-		for (PxU32 j = i; j < nnDof; j++) {
-			HTmp(i, j) = HTmp(j, i) = tmpcache->massMatrix[i * nnDof + j];
-		}
-	}
-
-	VectorXd jF(nnDof);
-	for (int i = 0; i < nnDof; i++) {
-		jF(i) = gCache->jointForce[i];
-	}
-
-	calcAcc = HTmp.fullPivHouseholderQr().solve(jF + centrifugalCoriolisGravity);
 }
