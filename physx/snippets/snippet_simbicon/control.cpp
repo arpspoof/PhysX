@@ -131,8 +131,12 @@ void printFar(double *arr, int n) {
 VectorXd calcAcc(24);
 
 void control(PxReal dt, int /*contactFlag*/) {
-	PxVec3 extforceaddneck(70, 0, 0);
+	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
+
+	PxVec3 extforceaddneck = PxVec3(70, 0, 0);
+	PxVec3 extforceaddRHip = PxVec3(70, 0, 60);
 	ar.linkMap["neck"]->link->addForce(extforceaddneck);
+	ar.linkMap["right_hip"]->link->addForce(extforceaddRHip);
 
 	//////////////////////////////////////
 	PxU32 nnDof = gArticulation->getDofs();
@@ -157,8 +161,8 @@ void control(PxReal dt, int /*contactFlag*/) {
 
 	gArticulation->computeGeneralizedGravityForce(*tmpcache3);
 
-	auto &extf = tmpcache4->externalForces[ar.linkMap["neck"]->link->getLinkIndex()];
-	extf.force = extforceaddneck;
+	tmpcache4->externalForces[ar.linkMap["neck"]->link->getLinkIndex()].force = extforceaddneck;
+	tmpcache4->externalForces[ar.linkMap["right_hip"]->link->getLinkIndex()].force = extforceaddRHip;
 	gArticulation->computeGeneralizedExternalForce(*tmpcache4);
 
 	printf("ext force\n");
@@ -176,8 +180,6 @@ void control(PxReal dt, int /*contactFlag*/) {
 	}
 
 	/////////////////////////////////////////
-
-	gArticulation->copyInternalStateToCache(*gCache, PxArticulationCache::eALL);
 
 	targetPositions = vector<float>(24, 0.f);
 	targetVelocities = vector<float>(24, 0.f);
