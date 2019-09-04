@@ -132,5 +132,5 @@ void loadRoot() {
 
 	arTree.buildArticulation(ar);
 
-	gArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, true);
+//	gArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, true);
 }

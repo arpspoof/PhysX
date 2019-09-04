@@ -269,8 +269,22 @@ namespace Dy
 	}
 
 	void FeatherstoneArticulation::inverseDynamicFloatingBase(ArticulationData& data, const PxVec3& gravity,
-		ScratchData& scratchData, bool computeCoriolis)
+		ScratchData& scratchData, bool computeCoriolis, bool computeExternal)
 	{
+	/*	if (computeExternal) {
+			scratchData.externalAccels = data.getExternalAccelerations();
+			for (int i = 0; i < data.getLinkCount(); i++) {
+				printf("extern acc for link %d\n", i);
+				for (int j = 0; j < 3; j++) {
+					printf("%f ", data.getExternalAccelerations()[i].angular[j]);
+				}
+				for (int j = 0; j < 3; j++) {
+					printf("%f ", data.getExternalAccelerations()[i].linear[j]);
+				}
+				printf("\n");
+			}
+		}*/
+		
 		//pass 1
 		computeLinkVelocities(data, scratchData);
 
@@ -576,7 +590,7 @@ namespace Dy
 		if (fixBase)
 			inverseDynamic(mArticulationData, PxVec3(0.f), scratchData, false);
 		else
-			inverseDynamicFloatingBase(mArticulationData, PxVec3(0.f), scratchData, false);
+			inverseDynamicFloatingBase(mArticulationData, PxVec3(0.f), scratchData, false, true);
 
 		allocator->free(tempMemory);
 		allocator->free(accels);

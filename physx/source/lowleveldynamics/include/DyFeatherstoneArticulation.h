@@ -722,7 +722,7 @@ namespace Dy
 			ScratchData& scratchData, bool computeCoriolis);
 
 		void inverseDynamicFloatingBase(ArticulationData& data, const PxVec3& gravity,
-			ScratchData& scratchData, bool computeCoriolis);
+			ScratchData& scratchData, bool computeCoriolis, bool computeExternal = false);
 
 		//compute link body force with motion velocity and acceleration
 		void computeZAForceInv(ArticulationData& data, ScratchData& scratchData);

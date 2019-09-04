@@ -159,9 +159,9 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 	forces[0] = t*4;
 	forces[1] = a*4;
 	forces[2] = b*4;
-	forces[3] = rand() % 50;
-	forces[4] = rand() % 50;
-	forces[5] = rand() % 50;
+	forces[3] = rand() % 10;
+	forces[4] = rand() % 10;
+	forces[5] = rand() % 10;
 
 	PxReal *velocities = gCache->jointVelocity;
 
@@ -225,11 +225,14 @@ void control(PxReal /*dt*/, int /*contactFlag*/) {
 	printFar(tmp2->jointForce, nDof);
 
 	PxArticulationCache* tmp3 = gArticulation->createCache();
+	gArticulation->copyInternalStateToCache(*tmp3, PxArticulationCache::eVELOCITY);
 	gArticulation->computeGeneralizedGravityForce(*tmp3);
 	printf("gravity:\n");
 	printFar(tmp3->jointForce, nDof);
 
 	PxVec3 addedForce(50, 60, 70);
+//	addedForce *= 0;
+
 	ar.linkMap["neck"]->link->addForce(addedForce);
 	PxArticulationCache* tmp4 = gArticulation->createCache();
 	tmp4->externalForces[ar.linkMap["neck"]->link->getLinkIndex()].force = addedForce;
