@@ -723,7 +723,7 @@ namespace Dy
 			ScratchData& scratchData, Cm::SpatialVectorF* tZ, Cm::SpatialVectorF* tDeltaV);
 
 		void computeIs(ArticulationLinkData& linkDatum, ArticulationJointCoreData& jointDatum, const PxU32 linkID);
-		static SpatialMatrix computePropagateSpatialInertia(const PxU8 jointType, ArticulationJointCoreData& jointDatum,
+		static SpatialMatrix computePropagateSpatialInertia(PxU32 linkId, const PxU8 jointType, ArticulationJointCoreData& jointDatum,
 			const SpatialMatrix& articulatedInertia, const Cm::SpatialVectorF* linkIs, InvStIs& invStIs, IsInvD& isInvD, 
 			const SpatialSubspaceMatrix& motionMatrix);
 

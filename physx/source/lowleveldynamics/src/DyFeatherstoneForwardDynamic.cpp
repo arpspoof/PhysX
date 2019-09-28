@@ -46,6 +46,9 @@
 #include "common/PxProfileZone.h"
 #include <stdio.h>
 
+float  			g_SPD_Dt = 0;
+const float* 	g_SPD_Kd = nullptr;
+const int*		g_SPD_LinkIdCacheIndexMap = nullptr;
 
 #ifdef _MSC_VER
 #pragma warning(disable:4505)
@@ -130,7 +133,7 @@ namespace Dy
 	}
 
 	//compute inertia contribution part
-	SpatialMatrix FeatherstoneArticulation::computePropagateSpatialInertia(const PxU8 jointType, ArticulationJointCoreData& jointDatum,
+	SpatialMatrix FeatherstoneArticulation::computePropagateSpatialInertia(PxU32 linkId, const PxU8 jointType, ArticulationJointCoreData& jointDatum,
 		const SpatialMatrix& articulatedInertia, const Cm::SpatialVectorF* linkIs, InvStIs& invStIs, IsInvD& isInvD, const SpatialSubspaceMatrix& motionMatrix)
 	{
 		SpatialMatrix spatialInertia;
@@ -144,7 +147,13 @@ namespace Dy
 
 			const Cm::SpatialVectorF& Is = linkIs[0];
 
-			const PxReal stIs = sa.innerProduct(Is);
+			PxReal stIs = sa.innerProduct(Is);
+
+			if (g_SPD_LinkIdCacheIndexMap)
+			{
+				float kd = g_SPD_Kd[g_SPD_LinkIdCacheIndexMap[linkId]];
+				stIs += kd * g_SPD_Dt;
+			}
 
 			const PxReal iStIs = (stIs > /*PX_EPS_REAL*/1e-5f) ? (1.f / stIs) : 0.f;
 
@@ -188,6 +197,15 @@ namespace Dy
 				{
 					const Cm::UnAlignedSpatialVector& sa = motionMatrix[ind2];
 					D[ind][ind2] = sa.innerProduct(linkIs[ind]);
+				}
+			}
+
+			if (g_SPD_LinkIdCacheIndexMap)
+			{
+				int cacheIndex = g_SPD_LinkIdCacheIndexMap[linkId];
+				for (PxU32 i = 0; i < jointDatum.dof; ++i)
+				{
+					D[i][i] += g_SPD_Dt * g_SPD_Kd[cacheIndex + i];
 				}
 			}
 
@@ -296,7 +314,7 @@ namespace Dy
 			computeIs(linkDatum, jointDatum, linkID);
 
 			//(I - Is*Inv(sIs)*sI)
-			SpatialMatrix spatialInertiaW = computePropagateSpatialInertia(link.inboundJoint->jointType, 
+			SpatialMatrix spatialInertiaW = computePropagateSpatialInertia(linkID, link.inboundJoint->jointType, 
 				jointDatum, data.mWorldSpatialArticulatedInertia[linkID], linkDatum.IsW, data.mInvStIs[linkID], data.mIsInvDW[linkID], data.mWorldMotionMatrix[linkID]);
 
 			//transform spatial inertia into parent space
