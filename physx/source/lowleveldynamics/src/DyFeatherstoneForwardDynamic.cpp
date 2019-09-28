@@ -46,6 +46,9 @@
 #include "common/PxProfileZone.h"
 #include <stdio.h>
 
+float  			g_SPD_Dt = 0;
+const float* 	g_SPD_Kd = nullptr;
+const int*		g_SPD_LinkIdCacheIndexMap = nullptr;
 
 #ifdef _MSC_VER
 #pragma warning(disable:4505)
@@ -129,7 +132,7 @@ namespace Dy
 	}
 
 	//compute inertia contribution part
-	SpatialMatrix FeatherstoneArticulation::computePropagateSpatialInertia(const PxU8 jointType, ArticulationLinkData& linkDatum, ArticulationJointCoreData& jointDatum,
+	SpatialMatrix FeatherstoneArticulation::computePropagateSpatialInertia(PxU32 linkId, const PxU8 jointType, ArticulationLinkData& linkDatum, ArticulationJointCoreData& jointDatum,
 		const SpatialMatrix& articulatedInertia, InvStIs& invStIs, IsInvD& isInvD, const SpatialSubspaceMatrix& motionMatrix)
 	{
 		SpatialMatrix spatialInertia;
@@ -143,7 +146,13 @@ namespace Dy
 
 			Cm::SpatialVectorF& Is = linkDatum.Is[0];
 
-			const PxReal stIs = sa.innerProduct(linkDatum.Is[0]);
+			PxReal stIs = sa.innerProduct(Is);
+
+			if (g_SPD_LinkIdCacheIndexMap)
+			{
+				float kd = g_SPD_Kd[g_SPD_LinkIdCacheIndexMap[linkId]];
+				stIs += kd * g_SPD_Dt;
+			}
 
 			const PxReal iStIs = (stIs > /*PX_EPS_REAL*/1e-5f) ? (1.f / stIs) : 0.f;
 
@@ -187,6 +196,15 @@ namespace Dy
 				{
 					const Cm::SpatialVectorF& sa = motionMatrix[ind2];
 					D[ind][ind2] = sa.innerProduct(linkDatum.Is[ind]);
+				}
+			}
+
+			if (g_SPD_LinkIdCacheIndexMap)
+			{
+				int cacheIndex = g_SPD_LinkIdCacheIndexMap[linkId];
+				for (PxU32 i = 0; i < jointDatum.dof; ++i)
+				{
+					D[i][i] += g_SPD_Dt * g_SPD_Kd[cacheIndex + i];
 				}
 			}
 
@@ -295,7 +313,7 @@ namespace Dy
 			computeIs(linkDatum, jointDatum, linkID);
 
 			//(I - Is*Inv(sIs)*sI)
-			SpatialMatrix spatialInertia = computePropagateSpatialInertia(link.inboundJoint->jointType,
+			SpatialMatrix spatialInertia = computePropagateSpatialInertia(linkID, link.inboundJoint->jointType,
 				linkDatum, jointDatum, data.mSpatialArticulatedInertia[linkID], data.mInvStIs[linkID], data.mIsInvD[linkID], data.mMotionMatrix[linkID]);
 
 			//transform spatial inertia into parent space
