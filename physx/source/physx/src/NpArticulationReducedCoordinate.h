@@ -124,7 +124,7 @@ namespace physx
 
 		virtual		bool						computeLambda(PxArticulationCache& cache, PxArticulationCache& rollBackCache, const PxReal* const jointTorque, const PxU32 maxIter) const;
 
-		virtual		void						computeGeneralizedMassMatrix(PxArticulationCache& cache) const;
+		virtual		void						computeGeneralizedMassMatrix(PxArticulationCache& cache, bool makeDense) const;
 
 		virtual		void						addLoopJoint(PxJoint* joint);
 

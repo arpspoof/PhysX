@@ -312,14 +312,14 @@ bool NpArticulationReducedCoordinate::computeLambda(PxArticulationCache& cache, 
 	return mImpl.mArticulation.getScArticulation().computeLambda(cache, initialState, jointTorque, getScene()->getGravity(), maxIter);
 }
 
-void NpArticulationReducedCoordinate::computeGeneralizedMassMatrix(PxArticulationCache& cache) const
+void NpArticulationReducedCoordinate::computeGeneralizedMassMatrix(PxArticulationCache& cache, bool makeDense) const
 {
 	PX_CHECK_AND_RETURN(mImpl.getAPIScene(), "PxArticulation::computeGeneralizedMassMatrix: object must be in a scene");
 	NP_READ_CHECK(mImpl.getOwnerScene());
 
 	PX_CHECK_AND_RETURN(cache.version == mImpl.mCacheVersion, "PxArticulation::computeGeneralizedMassMatrix : cache is invalid, articulation configuration has changed! ");
 
-	mImpl.mArticulation.getScArticulation().computeGeneralizedMassMatrix(cache);
+	mImpl.mArticulation.getScArticulation().computeGeneralizedMassMatrix(cache, makeDense);
 }
 
 void NpArticulationReducedCoordinate::addLoopJoint(PxJoint* joint)

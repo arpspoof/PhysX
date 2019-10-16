@@ -276,6 +276,13 @@ namespace Dy
 
 		//pass 3
 		computeRelativeGeneralizedForceInv(data, scratchData);
+
+		auto p0c = scratchData.spatialZAVectors[0];
+		auto jForce = scratchData.jointForces;
+		for (PxU32 i = 0; i < 6; i++)
+		{
+			jForce[data.getDofs() + i] = p0c[i];
+		}
 	}
 
 
@@ -1746,7 +1753,7 @@ namespace Dy
 	}
 
 	//i is the current link ID, we need to compute the row/column related to the joint i with all the other joints
-	PxU32 computeHi(ArticulationData& data, const PxU32 linkID, PxReal* massMatrix, Cm::SpatialVectorF* f)
+	PxU32 computeHi(ArticulationData& data, const PxU32 linkID, PxReal* massMatrix, Cm::SpatialVectorF* f, int offset = 0)
 	{
 		ArticulationLink* links = data.getLinks();
 
@@ -1757,11 +1764,11 @@ namespace Dy
 		//Hii
 		for (PxU32 ind = 0; ind < jointDatum.dof; ++ind)
 		{
-			const PxU32 row = (jointDatum.jointOffset + ind)* totalDofs;
+			const PxU32 row = (jointDatum.jointOffset + ind + offset) * (totalDofs + offset);
 			const Cm::SpatialVectorF& tf = f[ind];
 			for (PxU32 ind2 = 0; ind2 < jointDatum.dof; ++ind2)
 			{
-				const PxU32 col = jointDatum.jointOffset + ind2;
+				const PxU32 col = jointDatum.jointOffset + ind2 + offset;
 				const Cm::UnAlignedSpatialVector& sa = data.getWorldMotionMatrix(linkID)[ind2];
 				massMatrix[row + col] = sa.innerProduct(tf);
 			}
@@ -1788,11 +1795,11 @@ namespace Dy
 			for (PxU32 ind = 0; ind < pJointDatum.dof; ++ind)
 			{
 				const Cm::UnAlignedSpatialVector& sa = data.getWorldMotionMatrix(j)[ind];
-				const PxU32 col = pJointDatum.jointOffset + ind;
+				const PxU32 col = pJointDatum.jointOffset + ind + offset;
 
 				for (PxU32 ind2 = 0; ind2 < jointDatum.dof; ++ind2)
 				{
-					const PxU32 row = (jointDatum.jointOffset + ind2)* totalDofs;
+					const PxU32 row = (jointDatum.jointOffset + ind2 + offset) * (totalDofs + offset);
 
 					Cm::SpatialVectorF& fcol = f[ind2];
 
@@ -1804,13 +1811,13 @@ namespace Dy
 			{
 				for (PxU32 ind = 0; ind < pJointDatum.dof; ++ind)
 				{
-					const PxU32 pRow = (pJointDatum.jointOffset + ind)* totalDofs;
-					const PxU32 col = pJointDatum.jointOffset + ind;
+					const PxU32 pRow = (pJointDatum.jointOffset + ind + offset) * (totalDofs + offset);
+					const PxU32 col = pJointDatum.jointOffset + ind + offset;
 
 					for (PxU32 ind2 = 0; ind2 < jointDatum.dof; ++ind2)
 					{
-						const PxU32 pCol = jointDatum.jointOffset + ind2;
-						const PxU32 row = (jointDatum.jointOffset + ind2) * totalDofs;
+						const PxU32 pCol = jointDatum.jointOffset + ind2 + offset;
+						const PxU32 row = (jointDatum.jointOffset + ind2 + offset) * (totalDofs + offset);
 
 						massMatrix[pRow + pCol] = massMatrix[row + col];
 					}
@@ -1874,13 +1881,13 @@ namespace Dy
 	}
 
 
-	void FeatherstoneArticulation::calculateHFloatingBase(PxArticulationCache& cache)
+	void FeatherstoneArticulation::calculateHFloatingBase(PxArticulationCache& cache, bool makeDense)
 	{
 		const PxU32 elementCount = mArticulationData.getDofs();
 
 		PxReal* massMatrix = cache.massMatrix;
 
-		PxMemZero(massMatrix, sizeof(PxReal) * elementCount * elementCount);
+		PxMemZero(massMatrix, sizeof(PxReal) * (6 + elementCount) * (6 + elementCount));
 
 		const PxU32 linkCount = mArticulationData.getLinkCount();
 
@@ -1923,7 +1930,7 @@ namespace Dy
 			}
 
 			//Hii, Hij, Hji 
-			const PxU32 j = computeHi(mArticulationData, i, massMatrix, f);
+			const PxU32 j = computeHi(mArticulationData, i, massMatrix, f, 6);
 
 			//transform F to the base link space
 			ArticulationLinkData& fDatum = linkData[j];
@@ -1934,20 +1941,71 @@ namespace Dy
 			}
 		}
 
-		//Ib = base link composite inertia tensor
-		//compute transpose(F) * inv(Ib) *F
-		Dy::SpatialMatrix invI0 = compositeSpatialInertia[0].invertInertia();
+		auto bottomRight = compositeSpatialInertia[0].getBottomRight();
 
-		//H - transpose(F) * inv(Ib) * F;
-		for (PxU32 row = 0; row < elementCount; ++row)
+		for (PxU32 row = 0; row < 3; ++row)
 		{
-			const Cm::SpatialVectorF& f = F[row];
-			for (PxU32 col = 0; col < elementCount; ++col)
+			for (PxU32 col = 0; col < 3; ++col)
 			{
-				const Cm::SpatialVectorF invIf = invI0 * F[col];
-				const PxReal v = f.innerProduct(invIf);
-				const PxU32 index = row * elementCount + col;
-				massMatrix[index] = massMatrix[index] - v;
+				const PxU32 index = row * (elementCount + 6) + col;
+				massMatrix[index] = compositeSpatialInertia[0].topRight(row, col);
+			}
+		}
+
+		for (PxU32 row = 0; row < 3; ++row)
+		{
+			for (PxU32 col = 3; col < 6; ++col)
+			{
+				const PxU32 index = row * (elementCount + 6) + col;
+				massMatrix[index] = compositeSpatialInertia[0].topLeft(row, col - 3);
+			}
+		}
+
+		for (PxU32 row = 3; row < 6; ++row)
+		{
+			for (PxU32 col = 0; col < 3; ++col)
+			{
+				const PxU32 index = row * (elementCount + 6) + col;
+				massMatrix[index] = bottomRight(row - 3, col);
+			}
+		}
+
+		for (PxU32 row = 3; row < 6; ++row)
+		{
+			for (PxU32 col = 3; col < 6; ++col)
+			{
+				const PxU32 index = row * (elementCount + 6) + col;
+				massMatrix[index] = compositeSpatialInertia[0].bottomLeft(row - 3, col - 3);
+			}
+		}
+
+		for (PxU32 x = 6; x < elementCount + 6; ++x)
+		{
+			for (PxU32 y = 0; y < 6; ++y)
+			{
+				const PxU32 index1 = x * (elementCount + 6) + y;
+				const PxU32 index2 = y * (elementCount + 6) + x;
+				massMatrix[index1] = massMatrix[index2] = F[x - 6][y];
+			}
+		}
+
+		if (makeDense)
+		{
+			//Ib = base link composite inertia tensor
+			//compute transpose(F) * inv(Ib) *F
+			Dy::SpatialMatrix invI0 = compositeSpatialInertia[0].invertInertia();
+
+			//H - transpose(F) * inv(Ib) * F;
+			for (PxU32 row = 0; row < elementCount; ++row)
+			{
+				const Cm::SpatialVectorF& f = F[row];
+				for (PxU32 col = 0; col < elementCount; ++col)
+				{
+					const Cm::SpatialVectorF invIf = invI0 * F[col];
+					const PxReal v = f.innerProduct(invIf);
+					const PxU32 index = (row + 6) * (elementCount + 6) + col + 6;
+					massMatrix[index] = massMatrix[index] - v;
+				}
 			}
 		}
 
@@ -1997,7 +2055,7 @@ namespace Dy
 
 	}
 
-	void FeatherstoneArticulation::getGeneralizedMassMatrixCRB(PxArticulationCache& cache)
+	void FeatherstoneArticulation::getGeneralizedMassMatrixCRB(PxArticulationCache& cache, bool makeDense)
 	{
 		if (mArticulationData.getDataDirty())
 		{
@@ -2012,7 +2070,7 @@ namespace Dy
 		}
 		else
 		{
-			calculateHFloatingBase(cache);
+			calculateHFloatingBase(cache, makeDense);
 		}
 
 	}

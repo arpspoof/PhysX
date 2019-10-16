@@ -505,7 +505,7 @@ namespace Dy
 
 		virtual void		getGeneralizedMassMatrix(PxArticulationCache& cache);
 
-		virtual void		getGeneralizedMassMatrixCRB(PxArticulationCache& cache);
+		virtual void		getGeneralizedMassMatrixCRB(PxArticulationCache& cache, bool makeDense);
 
 		virtual bool		storeStaticConstraint(const PxSolverConstraintDesc& desc);
 
@@ -841,7 +841,7 @@ namespace Dy
 
 		void calculateHFixBase(PxArticulationCache& cache);
 
-		void calculateHFloatingBase(PxArticulationCache& cache);
+		void calculateHFloatingBase(PxArticulationCache& cache, bool makeDense);
 
 		//joint limits
 		void enforcePrismaticLimits(PxReal* jPosition, ArticulationJointCore* joint);

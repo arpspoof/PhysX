@@ -333,7 +333,7 @@ namespace physx
 
 		@see commonInit
 		*/
-		virtual		void					computeGeneralizedMassMatrix(PxArticulationCache& cache) const = 0;
+		virtual		void					computeGeneralizedMassMatrix(PxArticulationCache& cache, bool makeDense) const = 0;
 	
 		/**
 		\brief add loop joint to the articulation system for inverse dynamic

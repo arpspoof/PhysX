@@ -179,7 +179,7 @@ namespace Sc
 
 						bool						computeLambda(PxArticulationCache& cache, PxArticulationCache& rollBackCache, const PxReal* const jointTorque, const PxVec3 gravity, const PxU32 maxIter) const;
 
-						void						computeGeneralizedMassMatrix(PxArticulationCache& cache) const;
+						void						computeGeneralizedMassMatrix(PxArticulationCache& cache, bool makeDense) const;
 
 						PxU32						getCoefficientMatrixSize() const;
 
