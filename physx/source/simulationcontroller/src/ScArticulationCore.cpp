@@ -256,10 +256,10 @@ bool Sc::ArticulationCore::computeLambda(PxArticulationCache& cache, PxArticulat
 	return mSim ? mSim->computeLambda(cache, initialState, jointTorque, gravity, maxIter) : false;
 }
 
-void Sc::ArticulationCore::computeGeneralizedMassMatrix(PxArticulationCache& cache) const
+void Sc::ArticulationCore::computeGeneralizedMassMatrix(PxArticulationCache& cache, bool makeDense) const
 {
 	if(mSim)
-		mSim->computeGeneralizedMassMatrix(cache);
+		mSim->computeGeneralizedMassMatrix(cache, makeDense);
 }
 
 PxU32 Sc::ArticulationCore::getCoefficientMatrixSize() const

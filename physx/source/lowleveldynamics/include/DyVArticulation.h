@@ -399,7 +399,7 @@ namespace physx
 																const PxVec3& /*gravity*/, const PxU32 /*maxIter*/) { return false;  }
 
 			virtual			void					getGeneralizedMassMatrix(PxArticulationCache& /*cache*/){}
-			virtual			void					getGeneralizedMassMatrixCRB(PxArticulationCache& /*cache*/){}
+			virtual			void					getGeneralizedMassMatrixCRB(PxArticulationCache& /*cache*/, bool /*makeDense*/){}
 
 			virtual			void					teleportRootLink(){}
 
