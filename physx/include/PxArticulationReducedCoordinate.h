@@ -264,6 +264,15 @@ namespace physx
 		virtual		void					computeGeneralizedExternalForce(PxArticulationCache& cache) const = 0;
 
 		/**
+		\brief determine joint force change caused by everything including external force, gravity, coriolis...
+
+		\param[in] cache data
+
+		@see commonInit
+		*/
+		virtual		void					computeGeneralizedBiasForce(PxArticulationCache& cache) const = 0;
+
+		/**
 		\brief determine the joint acceleration for each joint
 		This is purely calculates the change in joint acceleration due to change in the joint force
 

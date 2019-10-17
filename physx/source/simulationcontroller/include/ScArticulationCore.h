@@ -167,6 +167,8 @@ namespace Sc
 
 						void						computeGeneralizedExternalForce(PxArticulationCache& cache) const;
 
+						void						computeGeneralizedBiasForce(PxArticulationCache& cache) const;
+
 						void						computeJointAcceleration(PxArticulationCache& cache) const;
 
 						void						computeJointForce(PxArticulationCache& cache) const;

@@ -648,6 +648,11 @@ void Sc::ArticulationSim::computeGeneralizedExternalForce(PxArticulationCache& c
 	mLLArticulation->getGeneralizedExternalForce(cache);
 }
 
+void Sc::ArticulationSim::computeGeneralizedBiasForce(PxArticulationCache& cache)
+{
+	mLLArticulation->getGeneralizedBiasForce(mScene.getGravityFast(), cache);
+}
+
 void Sc::ArticulationSim::computeJointAcceleration(PxArticulationCache& cache)
 {
 	mLLArticulation->getJointAcceleration(mScene.getGravityFast(), cache);

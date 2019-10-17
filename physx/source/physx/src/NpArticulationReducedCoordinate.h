@@ -113,6 +113,8 @@ namespace physx
 
 		virtual		void						computeGeneralizedExternalForce(PxArticulationCache& cache) const;
 
+		virtual		void						computeGeneralizedBiasForce(PxArticulationCache& cache) const;
+
 		virtual		void						computeJointAcceleration(PxArticulationCache& cache) const;
 		
 		virtual		void						computeJointForce(PxArticulationCache& cache) const;

@@ -422,6 +422,9 @@ namespace Dy
 		//external force as input, joint force as output
 		virtual void		getGeneralizedExternalForce(PxArticulationCache& /*cache*/);
 
+		// taking into account all of gravity, coriolis, external
+		virtual void		getGeneralizedBiasForce(const PxVec3& gravity, PxArticulationCache& /*cache*/);
+
 		//joint force as input, joint acceleration as output
 		virtual void		getJointAcceleration(const PxVec3& gravity, PxArticulationCache& cache);
 

@@ -227,6 +227,12 @@ void Sc::ArticulationCore::computeGeneralizedExternalForce(PxArticulationCache& 
 		mSim->computeGeneralizedExternalForce(cache);
 }
 
+void Sc::ArticulationCore::computeGeneralizedBiasForce(PxArticulationCache& cache) const
+{
+	if(mSim)
+		mSim->computeGeneralizedBiasForce(cache);
+}
+
 void Sc::ArticulationCore::computeJointAcceleration(PxArticulationCache& cache) const
 {
 	if(mSim)
