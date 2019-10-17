@@ -377,6 +377,8 @@ namespace physx
 
 			virtual			void					getGeneralizedExternalForce(PxArticulationCache& /*cache*/) {}
 
+			virtual			void					getGeneralizedBiasForce(const PxVec3& /*gravity*/, PxArticulationCache& /*cache*/) {}
+
 			virtual			void					getJointAcceleration(const PxVec3& /*gravity*/, PxArticulationCache& /*cache*/){}
 
 			virtual			void					getJointForce(PxArticulationCache& /*cache*/){}

@@ -247,6 +247,16 @@ void NpArticulationReducedCoordinate::computeGeneralizedExternalForce(PxArticula
 	mImpl.mArticulation.getScArticulation().computeGeneralizedExternalForce(cache);
 }
 
+void NpArticulationReducedCoordinate::computeGeneralizedBiasForce(PxArticulationCache& cache) const
+{
+	PX_CHECK_AND_RETURN(mImpl.getAPIScene(), "PxArticulation::computeGeneralizedBiasForce: object must be in a scene");
+	NP_READ_CHECK(mImpl.getOwnerScene());
+
+	PX_CHECK_AND_RETURN(cache.version == mImpl.mCacheVersion, "PxArticulation::computeGeneralizedBiasForce : cache is invalid, articulation configuration has changed! ");
+
+	mImpl.mArticulation.getScArticulation().computeGeneralizedBiasForce(cache);
+}
+
 void NpArticulationReducedCoordinate::computeJointAcceleration(PxArticulationCache& cache) const
 {
 	PX_CHECK_AND_RETURN(mImpl.getAPIScene(), "PxArticulation::computeJointAcceleration: object must be in a scene");
