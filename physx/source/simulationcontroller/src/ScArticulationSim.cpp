@@ -633,24 +633,24 @@ void Sc::ArticulationSim::commonInit()
 	mLLArticulation->initializeCommonData();
 }
 
-void Sc::ArticulationSim::computeGeneralizedGravityForce(PxArticulationCache& cache)
+void Sc::ArticulationSim::computeGeneralizedGravityForce(PxArticulationCache& cache, bool forceRNEA)
 {
-	mLLArticulation->getGeneralizedGravityForce(mScene.getGravityFast(), cache);
+	mLLArticulation->getGeneralizedGravityForce(mScene.getGravityFast(), cache, forceRNEA);
 }
 
-void Sc::ArticulationSim::computeCoriolisAndCentrifugalForce(PxArticulationCache& cache)
+void Sc::ArticulationSim::computeCoriolisAndCentrifugalForce(PxArticulationCache& cache, bool forceRNEA)
 {
-	mLLArticulation->getCoriolisAndCentrifugalForce(cache);
+	mLLArticulation->getCoriolisAndCentrifugalForce(cache, forceRNEA);
 }
 
-void Sc::ArticulationSim::computeGeneralizedExternalForce(PxArticulationCache& cache)
+void Sc::ArticulationSim::computeGeneralizedExternalForce(PxArticulationCache& cache, bool forceRNEA)
 {
-	mLLArticulation->getGeneralizedExternalForce(cache);
+	mLLArticulation->getGeneralizedExternalForce(cache, forceRNEA);
 }
 
-void Sc::ArticulationSim::computeGeneralizedBiasForce(PxArticulationCache& cache)
+void Sc::ArticulationSim::computeGeneralizedBiasForce(PxArticulationCache& cache, bool forceRNEA)
 {
-	mLLArticulation->getGeneralizedBiasForce(mScene.getGravityFast(), cache);
+	mLLArticulation->getGeneralizedBiasForce(mScene.getGravityFast(), cache, forceRNEA);
 }
 
 void Sc::ArticulationSim::computeJointAcceleration(PxArticulationCache& cache)

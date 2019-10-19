@@ -266,6 +266,13 @@ namespace Dy
 
 		//pass 2
 		computeGeneralizedForceInv(data, scratchData);
+
+		auto p0c = scratchData.spatialZAVectors[0];
+		auto jForce = scratchData.jointForces;
+		for (PxU32 i = 0; i < 6; i++)
+		{
+			jForce[data.getDofs() + i] = p0c[i];
+		}
 	}
 
 	void FeatherstoneArticulation::inverseDynamicFloatingBase(ArticulationData& data, const PxVec3& gravity,
@@ -291,13 +298,6 @@ namespace Dy
 
 		//pass 3
 		computeRelativeGeneralizedForceInv(data, scratchData);
-
-		auto p0c = scratchData.spatialZAVectors[0];
-		auto jForce = scratchData.jointForces;
-		for (PxU32 i = 0; i < 6; i++)
-		{
-			jForce[data.getDofs() + i] = p0c[i];
-		}
 	}
 
 
@@ -411,7 +411,7 @@ namespace Dy
 		mArticulationData.setDataDirty(false);
 	}
 
-	void FeatherstoneArticulation::getGeneralizedGravityForce(const PxVec3& gravity, PxArticulationCache& cache)
+	void FeatherstoneArticulation::getGeneralizedGravityForce(const PxVec3& gravity, PxArticulationCache& cache, bool forceRNEA)
 	{
 
 		if (mArticulationData.getDataDirty())
@@ -489,7 +489,8 @@ namespace Dy
 			scratchData.jointForces = cache.jointForce;
 			scratchData.externalAccels = NULL;
 
-			inverseDynamicFloatingBase(mArticulationData, tGravity, scratchData, false);
+			if (forceRNEA) inverseDynamic(mArticulationData, tGravity, scratchData, false);
+			else inverseDynamicFloatingBase(mArticulationData, tGravity, scratchData, false);
 
 			allocator->free(tempMemory);
 		}
@@ -509,7 +510,7 @@ namespace Dy
 	}
 
 	//gravity, acceleration and external force(external acceleration) are zero
-	void  FeatherstoneArticulation::getCoriolisAndCentrifugalForce(PxArticulationCache& cache)
+	void  FeatherstoneArticulation::getCoriolisAndCentrifugalForce(PxArticulationCache& cache, bool forceRNEA)
 	{
 		if (mArticulationData.getDataDirty())
 		{
@@ -530,7 +531,7 @@ namespace Dy
 		scratchData.externalAccels = NULL;
 		
 		const bool fixBase = mArticulationData.getArticulationFlags() & PxArticulationFlag::eFIX_BASE;
-		if (fixBase)
+		if (fixBase || forceRNEA)
 			inverseDynamic(mArticulationData, PxVec3(0.f), scratchData, true);
 		else
 			inverseDynamicFloatingBase(mArticulationData, PxVec3(0.f), scratchData, true);
@@ -539,7 +540,7 @@ namespace Dy
 	}
 
 	//gravity, joint acceleration and joint velocity are zero
-	void  FeatherstoneArticulation::getGeneralizedExternalForce(PxArticulationCache& cache)
+	void  FeatherstoneArticulation::getGeneralizedExternalForce(PxArticulationCache& cache, bool forceRNEA)
 	{
 		if (mArticulationData.getDataDirty())
 		{
@@ -580,7 +581,7 @@ namespace Dy
 		scratchData.externalAccels = accels;
 
 		const bool fixBase = mArticulationData.getArticulationFlags() & PxArticulationFlag::eFIX_BASE;
-		if (fixBase)
+		if (fixBase || forceRNEA)
 			inverseDynamic(mArticulationData, PxVec3(0.f), scratchData, false);
 		else
 			inverseDynamicFloatingBase(mArticulationData, PxVec3(0.f), scratchData, false);
@@ -590,7 +591,7 @@ namespace Dy
 	}
 
 	// taking into account all of gravity, coriolis, external
-	void  FeatherstoneArticulation::getGeneralizedBiasForce(const PxVec3& gravity, PxArticulationCache& cache)
+	void  FeatherstoneArticulation::getGeneralizedBiasForce(const PxVec3& gravity, PxArticulationCache& cache, bool forceRNEA)
 	{
 		if (mArticulationData.getDataDirty())
 		{
@@ -632,7 +633,7 @@ namespace Dy
 		const PxVec3 tGravity = gravity;
 
 		const bool fixBase = mArticulationData.getArticulationFlags() & PxArticulationFlag::eFIX_BASE;
-		if (fixBase) {
+		if (fixBase || forceRNEA) {
 			inverseDynamic(mArticulationData, tGravity, scratchData, true);
 		}
 		else {
