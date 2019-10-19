@@ -50,6 +50,9 @@ float  			g_SPD_Dt = 0;
 const float* 	g_SPD_Kd = nullptr;
 const int*		g_SPD_LinkIdCacheIndexMap = nullptr;
 
+float g_CRBA_RootExternalSpatialForce[6] = {0};
+float g_ACC_test[6] = {0};
+
 #ifdef _MSC_VER
 #pragma warning(disable:4505)
 #endif
@@ -494,8 +497,16 @@ namespace Dy
 			//ArticulationLink& baseLink = data.getLink(0);
 			//const PxTransform& body2World = baseLink.bodyCore->body2World;
 
+			for (int i = 0; i < 6; i++) {
+				spatialZAForces[0][i] -= g_CRBA_RootExternalSpatialForce[i];
+			}
+
 			motionAccelerations[0] = -(invInertia * spatialZAForces[0]);
 			Cm::SpatialVectorF deltaV = motionAccelerations[0] * dt;
+
+			for (int i = 0; i < 6; i++) {
+				g_ACC_test[i] = motionAccelerations[0][i];
+			}
 
 			//Cm::SpatialVectorF oldMotionVel = motionVelocities[0];
 			//Cm::SpatialVectorF oldVel = motionVelocities[0];
@@ -1607,6 +1618,8 @@ namespace Dy
 		//compute inidividual zero acceleration force
 		computeZ(mArticulationData, gravity, scratchData);
 
+		printf("asfasfsafasfasfasfa\n");
+		abort();
 		computeArticulatedSpatialInertia(mArticulationData);
 
 		//compute corolis and centrifugal force
