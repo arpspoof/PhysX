@@ -107,13 +107,13 @@ namespace physx
 
 		virtual		void						commonInit() const;
 
-		virtual		void						computeGeneralizedGravityForce(PxArticulationCache& cache) const;
+		virtual		void						computeGeneralizedGravityForce(PxArticulationCache& cache, bool forceRNEA) const;
 
-		virtual		void						computeCoriolisAndCentrifugalForce(PxArticulationCache& cache) const;
+		virtual		void						computeCoriolisAndCentrifugalForce(PxArticulationCache& cache, bool forceRNEA) const;
 
-		virtual		void						computeGeneralizedExternalForce(PxArticulationCache& cache) const;
+		virtual		void						computeGeneralizedExternalForce(PxArticulationCache& cache, bool forceRNEA) const;
 
-		virtual		void						computeGeneralizedBiasForce(PxArticulationCache& cache) const;
+		virtual		void						computeGeneralizedBiasForce(PxArticulationCache& cache, bool forceRNEA) const;
 
 		virtual		void						computeJointAcceleration(PxArticulationCache& cache) const;
 		

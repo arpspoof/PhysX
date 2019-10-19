@@ -477,16 +477,16 @@ namespace Dy
 		virtual void		initializeCommonData();
 
 		//gravity as input, joint force as output
-		virtual void		getGeneralizedGravityForce(const PxVec3& gravity, PxArticulationCache& cache);
+		virtual void		getGeneralizedGravityForce(const PxVec3& gravity, PxArticulationCache& cache, bool forceRNEA);
 
 		//joint velocity as input, generalised force(coriolis and centrigugal force) as output
-		virtual void		getCoriolisAndCentrifugalForce(PxArticulationCache& cache);
+		virtual void		getCoriolisAndCentrifugalForce(PxArticulationCache& cache, bool forceRNEA);
 
 		//external force as input, joint force as output
-		virtual void		getGeneralizedExternalForce(PxArticulationCache& /*cache*/);
+		virtual void		getGeneralizedExternalForce(PxArticulationCache& /*cache*/, bool forceRNEA);
 
 		// taking into account all of gravity, coriolis, external
-		virtual void		getGeneralizedBiasForce(const PxVec3& gravity, PxArticulationCache& /*cache*/);
+		virtual void		getGeneralizedBiasForce(const PxVec3& gravity, PxArticulationCache& /*cache*/, bool forceRNEA);
 
 		//joint force as input, joint acceleration as output
 		virtual void		getJointAcceleration(const PxVec3& gravity, PxArticulationCache& cache);

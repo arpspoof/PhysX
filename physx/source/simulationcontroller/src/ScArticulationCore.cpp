@@ -219,28 +219,28 @@ void Sc::ArticulationCore::commonInit() const
 		mSim->commonInit();
 }
 
-void Sc::ArticulationCore::computeGeneralizedGravityForce(PxArticulationCache& cache) const
+void Sc::ArticulationCore::computeGeneralizedGravityForce(PxArticulationCache& cache, bool forceRNEA) const
 {
 	if(mSim)
-		mSim->computeGeneralizedGravityForce(cache);
+		mSim->computeGeneralizedGravityForce(cache, forceRNEA);
 }
 
-void Sc::ArticulationCore::computeCoriolisAndCentrifugalForce(PxArticulationCache& cache) const
+void Sc::ArticulationCore::computeCoriolisAndCentrifugalForce(PxArticulationCache& cache, bool forceRNEA) const
 {
 	if(mSim)
-		mSim->computeCoriolisAndCentrifugalForce(cache);
+		mSim->computeCoriolisAndCentrifugalForce(cache, forceRNEA);
 }
 
-void Sc::ArticulationCore::computeGeneralizedExternalForce(PxArticulationCache& cache) const
+void Sc::ArticulationCore::computeGeneralizedExternalForce(PxArticulationCache& cache, bool forceRNEA) const
 {
 	if(mSim)
-		mSim->computeGeneralizedExternalForce(cache);
+		mSim->computeGeneralizedExternalForce(cache, forceRNEA);
 }
 
-void Sc::ArticulationCore::computeGeneralizedBiasForce(PxArticulationCache& cache) const
+void Sc::ArticulationCore::computeGeneralizedBiasForce(PxArticulationCache& cache, bool forceRNEA) const
 {
 	if(mSim)
-		mSim->computeGeneralizedBiasForce(cache);
+		mSim->computeGeneralizedBiasForce(cache, forceRNEA);
 }
 
 void Sc::ArticulationCore::computeJointAcceleration(PxArticulationCache& cache) const

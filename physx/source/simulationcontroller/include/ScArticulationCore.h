@@ -162,13 +162,13 @@ namespace Sc
 
 						void						commonInit() const;
 
-						void						computeGeneralizedGravityForce(PxArticulationCache& cache) const;
+						void						computeGeneralizedGravityForce(PxArticulationCache& cache, bool forceRNEA) const;
 
-						void						computeCoriolisAndCentrifugalForce(PxArticulationCache& cache) const;
+						void						computeCoriolisAndCentrifugalForce(PxArticulationCache& cache, bool forceRNEA) const;
 
-						void						computeGeneralizedExternalForce(PxArticulationCache& cache) const;
+						void						computeGeneralizedExternalForce(PxArticulationCache& cache, bool forceRNEA) const;
 
-						void						computeGeneralizedBiasForce(PxArticulationCache& cache) const;
+						void						computeGeneralizedBiasForce(PxArticulationCache& cache, bool forceRNEA) const;
 
 						void						computeJointAcceleration(PxArticulationCache& cache) const;
 

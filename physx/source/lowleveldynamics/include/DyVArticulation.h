@@ -371,13 +371,13 @@ namespace physx
 
 			virtual			void					initializeCommonData() {}
 
-			virtual			void					getGeneralizedGravityForce(const PxVec3& /*gravity*/, PxArticulationCache& /*cache*/) {}
+			virtual			void					getGeneralizedGravityForce(const PxVec3& /*gravity*/, PxArticulationCache& /*cache*/, bool /*forceRNEA*/) {}
 
-			virtual			void					getCoriolisAndCentrifugalForce(PxArticulationCache& /*cache*/) {}
+			virtual			void					getCoriolisAndCentrifugalForce(PxArticulationCache& /*cache*/, bool /*forceRNEA*/) {}
 
-			virtual			void					getGeneralizedExternalForce(PxArticulationCache& /*cache*/) {}
+			virtual			void					getGeneralizedExternalForce(PxArticulationCache& /*cache*/, bool /*forceRNEA*/) {}
 
-			virtual			void					getGeneralizedBiasForce(const PxVec3& /*gravity*/, PxArticulationCache& /*cache*/) {}
+			virtual			void					getGeneralizedBiasForce(const PxVec3& /*gravity*/, PxArticulationCache& /*cache*/, bool /*forceRNEA*/) {}
 
 			virtual			void					getJointAcceleration(const PxVec3& /*gravity*/, PxArticulationCache& /*cache*/){}
 

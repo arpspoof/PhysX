@@ -217,44 +217,44 @@ void NpArticulationReducedCoordinate::commonInit() const
 	mImpl.mArticulation.getScArticulation().commonInit();
 }
 
-void NpArticulationReducedCoordinate::computeGeneralizedGravityForce(PxArticulationCache& cache) const
+void NpArticulationReducedCoordinate::computeGeneralizedGravityForce(PxArticulationCache& cache, bool forceRNEA) const
 {
 	PX_CHECK_AND_RETURN(mImpl.getAPIScene(), "PxArticulation::computeGeneralisedGravityForce: object must be in a scene");
 	NP_READ_CHECK(mImpl.getOwnerScene());
 
 	PX_CHECK_AND_RETURN(cache.version == mImpl.mCacheVersion, "PxArticulation::computeGeneralisedGravityForce : cache is invalid, articulation configuration has changed! ");
 
-	mImpl.mArticulation.getScArticulation().computeGeneralizedGravityForce(cache);
+	mImpl.mArticulation.getScArticulation().computeGeneralizedGravityForce(cache, forceRNEA);
 }
 
-void NpArticulationReducedCoordinate::computeCoriolisAndCentrifugalForce(PxArticulationCache& cache) const
+void NpArticulationReducedCoordinate::computeCoriolisAndCentrifugalForce(PxArticulationCache& cache, bool forceRNEA) const
 {
 	PX_CHECK_AND_RETURN(mImpl.getAPIScene(), "PxArticulation::computeCoriolisAndCentrifugalForce: object must be in a scene");
 	NP_READ_CHECK(mImpl.getOwnerScene());
 
 	PX_CHECK_AND_RETURN(cache.version == mImpl.mCacheVersion, "PxArticulation::computeCoriolisAndCentrifugalForce : cache is invalid, articulation configuration has changed! ");
 
-	mImpl.mArticulation.getScArticulation().computeCoriolisAndCentrifugalForce(cache);
+	mImpl.mArticulation.getScArticulation().computeCoriolisAndCentrifugalForce(cache, forceRNEA);
 }
 
-void NpArticulationReducedCoordinate::computeGeneralizedExternalForce(PxArticulationCache& cache) const
+void NpArticulationReducedCoordinate::computeGeneralizedExternalForce(PxArticulationCache& cache, bool forceRNEA) const
 {
 	PX_CHECK_AND_RETURN(mImpl.getAPIScene(), "PxArticulation::computeGeneralizedExternalForce: object must be in a scene");
 	NP_READ_CHECK(mImpl.getOwnerScene());
 
 	PX_CHECK_AND_RETURN(cache.version == mImpl.mCacheVersion, "PxArticulation::computeGeneralizedExternalForce : cache is invalid, articulation configuration has changed! ");
 
-	mImpl.mArticulation.getScArticulation().computeGeneralizedExternalForce(cache);
+	mImpl.mArticulation.getScArticulation().computeGeneralizedExternalForce(cache, forceRNEA);
 }
 
-void NpArticulationReducedCoordinate::computeGeneralizedBiasForce(PxArticulationCache& cache) const
+void NpArticulationReducedCoordinate::computeGeneralizedBiasForce(PxArticulationCache& cache, bool forceRNEA) const
 {
 	PX_CHECK_AND_RETURN(mImpl.getAPIScene(), "PxArticulation::computeGeneralizedBiasForce: object must be in a scene");
 	NP_READ_CHECK(mImpl.getOwnerScene());
 
 	PX_CHECK_AND_RETURN(cache.version == mImpl.mCacheVersion, "PxArticulation::computeGeneralizedBiasForce : cache is invalid, articulation configuration has changed! ");
 
-	mImpl.mArticulation.getScArticulation().computeGeneralizedBiasForce(cache);
+	mImpl.mArticulation.getScArticulation().computeGeneralizedBiasForce(cache, forceRNEA);
 }
 
 void NpArticulationReducedCoordinate::computeJointAcceleration(PxArticulationCache& cache) const

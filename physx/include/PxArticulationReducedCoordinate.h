@@ -255,7 +255,7 @@ namespace physx
 		
 		@see commonInit
 		*/
-		virtual		void					computeGeneralizedGravityForce(PxArticulationCache& cache) const = 0;
+		virtual		void					computeGeneralizedGravityForce(PxArticulationCache& cache, bool forceRNEA = false) const = 0;
 
 		/**
 		\brief determine coriolise and centrifugal force. External force, gravity and joint acceleration
@@ -265,7 +265,7 @@ namespace physx
 		
 		@see commonInit
 		*/
-		virtual		void					computeCoriolisAndCentrifugalForce(PxArticulationCache& cache) const = 0;
+		virtual		void					computeCoriolisAndCentrifugalForce(PxArticulationCache& cache, bool forceRNEA = false) const = 0;
 
 		/**
 		\brief determine joint force change caused by external force. Gravity, joint acceleration and joint velocity
@@ -275,7 +275,7 @@ namespace physx
 
 		@see commonInit
 		*/
-		virtual		void					computeGeneralizedExternalForce(PxArticulationCache& cache) const = 0;
+		virtual		void					computeGeneralizedExternalForce(PxArticulationCache& cache, bool forceRNEA = false) const = 0;
 
 		/**
 		\brief determine joint force change caused by everything including external force, gravity, coriolis...
@@ -284,7 +284,7 @@ namespace physx
 
 		@see commonInit
 		*/
-		virtual		void					computeGeneralizedBiasForce(PxArticulationCache& cache) const = 0;
+		virtual		void					computeGeneralizedBiasForce(PxArticulationCache& cache, bool forceRNEA = false) const = 0;
 
 		/**
 		\brief determine the joint acceleration for each joint
