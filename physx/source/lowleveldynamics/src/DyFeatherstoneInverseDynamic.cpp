@@ -48,6 +48,9 @@
 #include "DyConstraintPrep.h"
 #include "DySolverContext.h"
 
+const float* g_InvD_Root_Kd;
+float g_InvD_Dt;
+
 namespace physx
 {
 
@@ -220,6 +223,15 @@ namespace Dy
 		Cm::SpatialVectorF* zaForce = scratchData.spatialZAVectors;
 		PxReal* jointForces = scratchData.jointForces;
 
+		if (g_InvD_Root_Kd) {
+			for (int i = 0; i < 3; i++) {
+				compositeSpatialInertia[0].topRight(i, i) += g_InvD_Root_Kd[i] * g_InvD_Dt;
+			}
+			for (int i = 0; i < 3; i++) {
+				compositeSpatialInertia[0].bottomLeft(i, i) += g_InvD_Root_Kd[i + 3] * g_InvD_Dt;
+			}
+		}
+
 		Dy::SpatialMatrix invInertia = compositeSpatialInertia[0].invertInertia();
 		motionAccelerations[0] = -(invInertia * zaForce[0]);
 
@@ -298,6 +310,13 @@ namespace Dy
 
 		//pass 3
 		computeRelativeGeneralizedForceInv(data, scratchData);
+
+		auto p0c = scratchData.spatialZAVectors[0];
+		auto jForce = scratchData.jointForces;
+		for (PxU32 i = 0; i < 6; i++)
+		{
+			jForce[data.getDofs() + i] = p0c[i];
+		}
 	}
 
 
@@ -2045,6 +2064,14 @@ namespace Dy
 		{
 			//Ib = base link composite inertia tensor
 			//compute transpose(F) * inv(Ib) *F
+			if (g_InvD_Root_Kd) {
+				for (int i = 0; i < 3; i++) {
+					compositeSpatialInertia[0].topRight(i, i) += g_InvD_Root_Kd[i] * g_InvD_Dt;
+				}
+				for (int i = 0; i < 3; i++) {
+					compositeSpatialInertia[0].bottomLeft(i, i) += g_InvD_Root_Kd[i + 3] * g_InvD_Dt;
+				}
+			}
 			Dy::SpatialMatrix invI0 = compositeSpatialInertia[0].invertInertia();
 
 			//H - transpose(F) * inv(Ib) * F;
