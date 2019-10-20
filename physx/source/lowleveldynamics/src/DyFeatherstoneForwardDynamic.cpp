@@ -500,7 +500,7 @@ namespace Dy
 			//ArticulationLink& baseLink = data.getLink(0);
 			//const PxTransform& body2World = baseLink.bodyCore->body2World;
 
-			if (0 && g_ApplyABARootForce){
+			if (g_ApplyABARootForce){
 				SpatialMatrix baseInertia = data.getWorldSpatialArticulatedInertia(0);
 				for (int i = 0; i < 3; i++) baseInertia.topRight(i, i) += g_ABA_Root_Kd[i] * g_SPD_Dt;
 				for (int i = 0; i < 3; i++) baseInertia.bottomLeft(i, i) += g_ABA_Root_Kd[i + 3] * g_SPD_Dt;

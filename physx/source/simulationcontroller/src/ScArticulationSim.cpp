@@ -583,7 +583,7 @@ PxU32 Sc::ArticulationSim::getCacheDataSize() const
 		sizeof(PxSpatialForce) * linkCount							//external force
 		+ sizeof(PxReal) * (6 + totalDofs) * ((1 + jointCount) * 6)		//offset to end of dense jacobian (assuming free floating base)
 		+ sizeof(PxReal) * (6 + totalDofs) * (6 + totalDofs)						//mass matrix
-		+ sizeof(PxReal) * totalDofs * 4 + 6								//jointVelocity, jointAcceleration, jointPosition, joint force
+		+ sizeof(PxReal) * (totalDofs * 4 + 6)								//jointVelocity, jointAcceleration, jointPosition, joint force
 		+ sizeof(PxSpatialVelocity) * linkCount * 2						//link velocity, link acceleration
 		+ sizeof(PxArticulationRootLinkData);							//root link data
 	
