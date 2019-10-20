@@ -50,7 +50,10 @@ float  			g_SPD_Dt = 0;
 const float* 	g_SPD_Kd = nullptr;
 const int*		g_SPD_LinkIdCacheIndexMap = nullptr;
 
-float g_CRBA_RootExternalSpatialForce[6] = {0};
+bool g_ApplyABARootForce = false;
+const float* g_ABA_Root_Kd;
+
+float g_RootExternalSpatialForce[6] = {0};
 float g_ACC_test[6] = {0};
 
 #ifdef _MSC_VER
@@ -491,7 +494,6 @@ namespace Dy
 		if (!fixBase)
 		{
 			//ArticulationLinkData& baseLinkDatum = data.getLinkData(0);
-			SpatialMatrix invInertia = data.mBaseInvSpatialArticulatedInertia;//baseLinkDatum.spatialArticulatedInertia.invertInertia();
 
 #if FEATHERSTONE_DEBUG
 			SpatialMatrix result = invInertia * baseLinkDatum.spatialArticulatedInertia;
@@ -504,11 +506,24 @@ namespace Dy
 			ArticulationLink& baseLink = data.getLink(0);
 			const PxTransform& body2World = baseLink.bodyCore->body2World;
 
-			for (int i = 0; i < 6; i++) {
-				spatialZAForces[0][i] -= g_CRBA_RootExternalSpatialForce[i];
+			if (0 && g_ApplyABARootForce){
+				SpatialMatrix baseInertia = data.getSpatialArticulatedInertia(0);
+				for (int i = 0; i < 3; i++) baseInertia.topRight(i, i) += g_ABA_Root_Kd[i] * g_SPD_Dt;
+				for (int i = 0; i < 3; i++) baseInertia.bottomLeft(i, i) += g_ABA_Root_Kd[i + 3] * g_SPD_Dt;
+
+				Cm::SpatialVectorF rhs;
+				for (int i = 0; i < 6; i++) rhs[i] = g_RootExternalSpatialForce[i] - spatialZAForces[0][i];
+
+				motionAccelerations[0] = baseInertia.invertInertia() * rhs;
+			}
+			else {
+				SpatialMatrix invInertia = data.mBaseInvSpatialArticulatedInertia;
+				for (int i = 0; i < 6; i++) {
+					spatialZAForces[0][i] -= g_RootExternalSpatialForce[i];
+				}
+				motionAccelerations[0] = -(invInertia * spatialZAForces[0]);
 			}
 
-			motionAccelerations[0] = -(invInertia * spatialZAForces[0]);
 			Cm::SpatialVectorF deltaV = motionAccelerations[0] * dt;
 
 			for (int i = 0; i < 6; i++) {
