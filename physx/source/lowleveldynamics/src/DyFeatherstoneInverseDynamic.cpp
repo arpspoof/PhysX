@@ -508,7 +508,7 @@ namespace Dy
 			scratchData.jointForces = cache.jointForce;
 			scratchData.externalAccels = NULL;
 
-			if (forceRNEA) inverseDynamic(mArticulationData, tGravity, scratchData, false);
+			if (forceRNEA) inverseDynamic(mArticulationData, gravity, scratchData, false);
 			else inverseDynamicFloatingBase(mArticulationData, tGravity, scratchData, false);
 
 			allocator->free(tempMemory);
