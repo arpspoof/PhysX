@@ -56,6 +56,8 @@ const float* g_ABA_Root_Kd;
 float g_RootExternalSpatialForce[6] = {0};
 float g_ACC_test[6] = {0};
 
+physx::PxQuat g_JointQuat[256];
+
 #ifdef _MSC_VER
 #pragma warning(disable:4505)
 #endif
@@ -1009,7 +1011,7 @@ namespace Dy
 
 	PxQuat computeSphericalJointPositions(ArticulationJointCore* joint,
 		const PxQuat newRot, const PxQuat pBody2WorldRot,
-		PxReal* jPositions)
+		PxReal* jPositions, PxU32 jointOffset)
 	{
 		PxQuat newParentToChild = (newRot.getConjugate() * pBody2WorldRot).getNormalized();
 
@@ -1020,6 +1022,7 @@ namespace Dy
 			cB2w = -cB2w;
 
 		const PxQuat cB2cA = cA2w.getConjugate() * cB2w;
+		g_JointQuat[jointOffset] = cB2cA;
 
 		//tan(t / 2) = sin(t) / (1 + cos t), so this is the quarter angle
 		/*PxQuat twist, swing1, swing2;
@@ -1077,7 +1080,7 @@ namespace Dy
 				//const PxTransform pBody2World = pLink.bodyCore->body2World;
 
 				computeSphericalJointPositions(joint, link.bodyCore->body2World.q, 
-					pLink.bodyCore->body2World.q, jPositions);
+					pLink.bodyCore->body2World.q, jPositions, jointDatum.jointOffset);
 			}
 			else if (joint->jointType == PxArticulationJointType::eREVOLUTE)
 			{
@@ -1392,7 +1395,7 @@ namespace Dy
 					jPos[2] = jPosition[2] + (jVelocity[2] + jDeltaVelocity[2])*dt;*/
 
 					newParentToChild = computeSphericalJointPositions(joint, newWorldQ,
-						pBody2World.q, jPosition);
+						pBody2World.q, jPosition, jointDatum.jointOffset);
 
 					/*for (PxU32 i = 0; i < 3; ++i)
 					{

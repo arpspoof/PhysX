@@ -1099,7 +1099,7 @@ namespace Dy
 
 	PxQuat computeSphericalJointPositions(ArticulationJointCore* joint,
 		const PxQuat newRot, const PxQuat pBody2WorldRot,
-		PxReal* jPositions);
+		PxReal* jPositions, PxU32 jointOffset);
 
 	PxTransform FeatherstoneArticulation::propagateTransform(const PxU32 linkID, ArticulationLink* links,
 		ArticulationJointCoreData& jointDatum, Cm::SpatialVectorF* motionVelocities, const PxReal dt, const PxTransform& pBody2World, 
@@ -1232,7 +1232,7 @@ namespace Dy
 					newWorldQ = Ps::exp(worldAngVel*dt) * currentTransform.q;
 
 					newParentToChild = computeSphericalJointPositions(joint, newWorldQ,
-						pBody2World.q, jPosition);
+						pBody2World.q, jPosition, jointDatum.jointOffset);
 
 					PxQuat newQ = (pBody2World.q * newParentToChild.getConjugate()).getNormalized();
 
