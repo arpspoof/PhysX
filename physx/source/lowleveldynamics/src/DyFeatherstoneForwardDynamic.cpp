@@ -56,6 +56,8 @@ const float* g_ABA_Root_Kd;
 float g_RootExternalSpatialForce[6] = {0};
 float g_ACC_test[6] = {0};
 
+physx::PxQuat g_JointQuat[256];
+
 #ifdef _MSC_VER
 #pragma warning(disable:4505)
 #endif
@@ -957,11 +959,12 @@ namespace Dy
 
 	PxQuat computeSphericalJointPositions(const PxQuat relativeQuat,
 		const PxQuat newRot, const PxQuat pBody2WorldRot,
-		PxReal* jPositions, const SpatialSubspaceMatrix& motionMatrix)
+		PxReal* jPositions, const SpatialSubspaceMatrix& motionMatrix, PxU32 jointOffset)
 	{
 		PxQuat newParentToChild = (newRot.getConjugate() * pBody2WorldRot).getNormalized();
 
 		PxQuat jointRotation = newParentToChild * relativeQuat.getConjugate();
+		g_JointQuat[jointOffset] = jointRotation;
 
 		PxReal radians;
 		PxVec3 axis;
@@ -997,7 +1000,7 @@ namespace Dy
 				//const PxTransform pBody2World = pLink.bodyCore->body2World;
 
 				computeSphericalJointPositions(data.mRelativeQuat[linkID], link.bodyCore->body2World.q, 
-					pLink.bodyCore->body2World.q, jPositions, data.getMotionMatrix(linkID));
+					pLink.bodyCore->body2World.q, jPositions, data.getMotionMatrix(linkID), jointDatum.jointOffset);
 			}
 			else if (joint->jointType == PxArticulationJointType::eREVOLUTE)
 			{
@@ -1400,7 +1403,7 @@ namespace Dy
 					jPos[2] = jPosition[2] + (jVelocity[2] + jDeltaVelocity[2])*dt;*/
 
 					newParentToChild = computeSphericalJointPositions(data.mRelativeQuat[linkID], newWorldQ,
-						pBody2World.q, jPosition, data.getMotionMatrix(linkID));
+						pBody2World.q, jPosition, data.getMotionMatrix(linkID), jointDatum.jointOffset);
 
 					/*for (PxU32 i = 0; i < 3; ++i)
 					{
