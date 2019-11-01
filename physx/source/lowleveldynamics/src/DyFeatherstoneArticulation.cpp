@@ -3454,11 +3454,39 @@ namespace Dy
 			case PxArticulationJointType::eSPHERICAL:
 			{
 				PxQuat jointRotation(PxIdentity);
-				for (PxU32 d = jointDatum.dof; d > 0; --d)
+
+				if (jointDatum.dof < 3)
 				{
-					PxQuat deltaRot(jPosition[d - 1], data.mMotionMatrix[linkID][d - 1].top);
-					jointRotation = jointRotation * deltaRot;
+					for (PxU32 d = jointDatum.dof; d > 0; --d)
+					{
+						PxQuat deltaRot(-jPosition[d - 1], data.mMotionMatrix[linkID][d - 1].top);
+						jointRotation = jointRotation * deltaRot;
+					}
 				}
+				else
+				{
+					PxVec3 s(0, jPosition[1], jPosition[2]);
+					PxQuat swingQuat = s.isZero() ? PxQuat(0, 0, 0, 1) : PxQuat(s.magnitude(), s.getNormalized());
+					PxQuat result = swingQuat * PxQuat(jPosition[0], PxVec3(1, 0, 0));
+					jointRotation = result.getConjugate().getNormalized();
+					if (jointRotation.w < 0)	//shortest angle.
+						jointRotation = -jointRotation;
+
+#if PX_DEBUG
+					PxReal radians;
+					PxVec3 axis;
+					jointRotation.toRadiansAndUnitAxis(radians, axis);
+
+					
+					for (PxU32 d = 0; d < jointDatum.dof; ++d)
+					{
+						PxReal ang2 = data.mMotionMatrix[linkID][d].top.dot(axis)*radians;
+						PxReal diff2 = ang2 + jPosition[d];
+						PX_ASSERT(PxAbs(diff2) < 1e-3f);
+					}
+#endif
+				}
+
 
 				newParentToChild = (jointRotation * joint->relativeQuat).getNormalized();
 
