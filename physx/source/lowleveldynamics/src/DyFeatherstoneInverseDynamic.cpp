@@ -515,7 +515,7 @@ namespace Dy
 			scratchData.externalAccels = NULL;
 
 			if (forceRNEA) inverseDynamic(mArticulationData, gravity, scratchData, false);
-			else inverseDynamicFloatingBase(mArticulationData, tGravity, scratchData, false);
+			else inverseDynamicFloatingBase(mArticulationData, gravity, scratchData, false);
 
 			allocator->free(tempMemory);
 		}
