@@ -50,8 +50,6 @@ float  			g_SPD_Dt = 0;
 const float* 	g_SPD_Kd = nullptr;
 const int*		g_SPD_LinkIdCacheIndexMap = nullptr;
 
-physx::PxQuat g_JointQuat[256];
-
 #ifdef _MSC_VER
 #pragma warning(disable:4505)
 #endif
@@ -972,7 +970,7 @@ namespace Dy
 				//const PxTransform pBody2World = pLink.bodyCore->body2World;
 
 				computeSphericalJointPositions(data.mRelativeQuat[linkID], link.bodyCore->body2World.q, 
-					pLink.bodyCore->body2World.q, jPositions, data.getMotionMatrix(linkID), jointDatum.jointOffset);
+					pLink.bodyCore->body2World.q, jPositions, data.getMotionMatrix(linkID));
 			}
 			else if (joint->jointType == PxArticulationJointType::eREVOLUTE)
 			{
@@ -1375,7 +1373,7 @@ namespace Dy
 					jPos[2] = jPosition[2] + (jVelocity[2] + jDeltaVelocity[2])*dt;*/
 
 					newParentToChild = computeSphericalJointPositions(data.mRelativeQuat[linkID], newWorldQ,
-						pBody2World.q, jPosition, data.getMotionMatrix(linkID), jointDatum.jointOffset);
+						pBody2World.q, jPosition, data.getMotionMatrix(linkID));
 
 					/*for (PxU32 i = 0; i < 3; ++i)
 					{
