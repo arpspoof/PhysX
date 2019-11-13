@@ -3102,12 +3102,12 @@ namespace Dy
 				}
 				else
 				{
-					PxVec3 s(0, jPosition[1], jPosition[2]);
-					PxQuat swingQuat = s.isZero() ? PxQuat(0, 0, 0, 1) : PxQuat(s.magnitude(), s.getNormalized());
-					PxQuat result = swingQuat * PxQuat(jPosition[0], PxVec3(1, 0, 0));
-					jointRotation = result.getConjugate().getNormalized();
-					if (jointRotation.w < 0)	//shortest angle.
-						jointRotation = -jointRotation;
+					PxVec3 ang(0.f);
+					for (PxU32 d = 0; d < jointDatum.dof; ++d)
+					{
+						ang += data.mMotionMatrix[linkID][d].top * -jPosition[d];
+					}
+					jointRotation = Ps::exp(ang).getNormalized();
 
 #if PX_DEBUG
 					PxReal radians;
