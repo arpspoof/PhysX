@@ -60,6 +60,8 @@
 // articulation has to be aligned, which in an aligned pool means we need to size it
 // appropriately
 
+extern physx::PxQuat g_JointQuat[256];
+
 namespace physx
 {
 
@@ -1141,7 +1143,7 @@ namespace Dy
 
 	PxQuat computeSphericalJointPositions(const PxQuat relativeQuat,
 		const PxQuat newRot, const PxQuat pBody2WorldRot,
-		PxReal* jPositions, const SpatialSubspaceMatrix& motionMatrix);
+		PxReal* jPositions, const SpatialSubspaceMatrix& motionMatrix, PxU32 jointOffset);
 
 	PxTransform FeatherstoneArticulation::propagateTransform(const PxU32 linkID, ArticulationLink* links,
 		ArticulationJointCoreData& jointDatum, Cm::SpatialVectorF* motionVelocities, const PxReal dt, const PxTransform& pBody2World, 
@@ -1263,7 +1265,7 @@ namespace Dy
 				newWorldQ = Ps::exp(worldAngVel*dt) * currentTransform.q;
 
 				newParentToChild = computeSphericalJointPositions(mArticulationData.mRelativeQuat[linkID], newWorldQ,
-					pBody2World.q, jPosition, motionMatrix);
+					pBody2World.q, jPosition, motionMatrix, jointDatum.jointOffset);
 
 				/*PxQuat newQ = (pBody2World.q * newParentToChild.getConjugate()).getNormalized();
 
@@ -3150,6 +3152,8 @@ namespace Dy
 			PxTransform& body2World = link.bodyCore->body2World;
 			body2World.q = (pBody2World.q * newParentToChild.getConjugate()).getNormalized();
 			body2World.p = pBody2World.p + body2World.q.rotate(r);
+
+			g_JointQuat[jointDatum.jointOffset] = newParentToChild.getConjugate();
 
 			PX_ASSERT(body2World.isSane());
 		}
