@@ -3471,20 +3471,6 @@ namespace Dy
 					jointRotation = result.getConjugate().getNormalized();
 					if (jointRotation.w < 0)	//shortest angle.
 						jointRotation = -jointRotation;
-
-#if PX_DEBUG
-					PxReal radians;
-					PxVec3 axis;
-					jointRotation.toRadiansAndUnitAxis(radians, axis);
-
-					
-					for (PxU32 d = 0; d < jointDatum.dof; ++d)
-					{
-						PxReal ang2 = data.mMotionMatrix[linkID][d].top.dot(axis)*radians;
-						PxReal diff2 = ang2 + jPosition[d];
-						PX_ASSERT(PxAbs(diff2) < 1e-3f);
-					}
-#endif
 				}
 
 
