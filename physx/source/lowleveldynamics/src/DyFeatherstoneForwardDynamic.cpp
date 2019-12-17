@@ -45,9 +45,13 @@
 #include "PxsIslandSim.h"
 #include "common/PxProfileZone.h"
 #include <stdio.h>
+#include <chrono>
+
+long g_ABA_Timer = 0;
 
 float  			g_SPD_Dt = 0;
 const float* 	g_SPD_Kd = nullptr;
+const float* 	g_SPD_Fl = nullptr;
 const int*		g_SPD_LinkIdCacheIndexMap = nullptr;
 
 bool g_ApplyABARootForce = false;
