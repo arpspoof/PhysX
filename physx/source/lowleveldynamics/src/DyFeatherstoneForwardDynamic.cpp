@@ -45,9 +45,13 @@
 #include "PxsIslandSim.h"
 #include "common/PxProfileZone.h"
 #include <stdio.h>
+#include <chrono>
+
+long g_ABA_Timer = 0;
 
 float  			g_SPD_Dt = 0;
 const float* 	g_SPD_Kd = nullptr;
+const float* 	g_SPD_Fl = nullptr;
 const int*		g_SPD_LinkIdCacheIndexMap = nullptr;
 
 bool g_ApplyABARootForce = false;
@@ -980,7 +984,11 @@ namespace Dy
 			mArticulationData.mDeltaQ[a] = PxQuat(PxIdentity);
 		}
 
+        auto starttime = std::chrono::high_resolution_clock::now();
 		updateArticulation(scratchData, gravity, Z, DeltaV);
+        auto endtime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endtime - starttime).count();
+		g_ABA_Timer += duration;
 
 		scratchData.spatialZAVectors = mArticulationData.getTransmittedForces();
 		computeZAForceInv(mArticulationData, scratchData);
