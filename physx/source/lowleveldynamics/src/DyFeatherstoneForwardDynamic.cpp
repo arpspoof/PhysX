@@ -914,8 +914,11 @@ namespace Dy
 		scratchData.jointForces = mArticulationData.getJointForces();
 		scratchData.externalAccels = mArticulationData.getExternalAccelerations();
 
+		auto startTime = std::chrono::high_resolution_clock::now();
 		updateArticulation(scratchData, gravity, Z, DeltaV);
-
+		auto endTime = std::chrono::high_resolution_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+		g_ABA_Timer += duration;
 		
 		if (mArticulationData.mLinkCount > 1)
 		{
