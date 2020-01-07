@@ -1638,8 +1638,6 @@ namespace Dy
 		//compute inidividual zero acceleration force
 		computeZ(mArticulationData, gravity, scratchData);
 
-		printf("asfasfsafasfasfasfa\n");
-		abort();
 		computeArticulatedSpatialInertia(mArticulationData);
 
 		//compute corolis and centrifugal force
