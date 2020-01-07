@@ -501,7 +501,7 @@ namespace Dy
 			//const PxTransform& body2World = baseLink.bodyCore->body2World;
 
 			if (0 && g_ApplyABARootForce){
-				SpatialMatrix baseInertia = data.getSpatialArticulatedInertia(0);
+				SpatialMatrix baseInertia = data.getWorldSpatialArticulatedInertia(0);
 				for (int i = 0; i < 3; i++) baseInertia.topRight(i, i) += g_ABA_Root_Kd[i] * g_SPD_Dt;
 				for (int i = 0; i < 3; i++) baseInertia.bottomLeft(i, i) += g_ABA_Root_Kd[i + 3] * g_SPD_Dt;
 
@@ -511,7 +511,7 @@ namespace Dy
 				motionAccelerations[0] = baseInertia.invertInertia() * rhs;
 			}
 			else {
-				SpatialMatrix invInertia = data.mBaseInvSpatialArticulatedInertia;
+				SpatialMatrix invInertia = data.mBaseInvSpatialArticulatedInertiaW;
 				for (int i = 0; i < 6; i++) {
 					spatialZAForces[0][i] -= g_RootExternalSpatialForce[i];
 				}
